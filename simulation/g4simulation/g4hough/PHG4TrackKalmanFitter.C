@@ -55,6 +55,8 @@
 #define LogError(exp)		std::cout<<"ERROR: "<<__FILE__<<": "<<__LINE__<<": "<< exp <<"\n"
 #define LogWarning(exp)	std::cout<<"WARNING: "<<__FILE__<<": "<<__LINE__<<": "<< exp <<"\n"
 
+#define WILD_DOULBE -999999
+
 #define _DEBUG_MODE_ 0
 
 using namespace std;
@@ -152,7 +154,7 @@ PHG4TrackKalmanFitter::PHG4TrackKalmanFitter(const string &name) :
 				"PHG4TrackKalmanFitter_eval.root"), _eval_tree(
 		NULL), _tca_particlemap(NULL), _tca_vtxmap(NULL), _tca_trackmap(NULL), _tca_vertexmap(
 		NULL), _tca_trackmap_refit(NULL), _tca_primtrackmap(NULL), _tca_vertexmap_refit(
-		NULL), _do_evt_display(false) {
+		NULL), _eval_track_compare(NULL), _do_evt_display(false) {
 	_event = 0;
 }
 
@@ -295,8 +297,18 @@ int PHG4TrackKalmanFitter::process_event(PHCompositeNode *topNode) {
 			SvtxTrack* rf_track = MakeSvtxTrack(iter->second, rf_phgf_track,
 					vertex);
 
-			rf_phgf_tracks.push_back(rf_phgf_track);
-			rf_gf_tracks.push_back(rf_phgf_track->getGenFitTrack());
+			if(_do_eval) {
+				PHG4Particle* particle = NULL;
+			    for (PHG4TruthInfoContainer::ConstIterator it =
+			    		_truth_container->GetPrimaryParticleRange().first;
+			        it != _truth_container->GetPrimaryParticleRange().second; it++) {
+			      particle = it->second;
+			      //if(is_match_truth(particle, rf_phgf_track, 4))
+			      fill_eval_tree_compare_track(particle, iter->second, rf_phgf_track);
+			    }
+			}
+			//rf_phgf_tracks.push_back(rf_phgf_track);
+			//rf_gf_tracks.push_back(rf_phgf_track->getGenFitTrack());
 
 			if (_output_mode == MakeNewNode || _output_mode == DebugMode)
 				if (_trackmap_refit)
@@ -358,6 +370,7 @@ int PHG4TrackKalmanFitter::End(PHCompositeNode *topNode) {
 	if (_do_eval) {
 		PHTFileServer::get().cd(_eval_outname);
 		_eval_tree->Write();
+		_eval_track_compare->Write();
 	}
 
 	if (_do_evt_display)
@@ -466,6 +479,20 @@ void PHG4TrackKalmanFitter::init_eval_tree() {
 	_eval_tree->Branch("SvtxTrack", _tca_trackmap);
 	_eval_tree->Branch("SvtxVertex", _tca_vertexmap);
 	_eval_tree->Branch("SvtxTrackRefit", _tca_trackmap_refit);
+
+	_eval_track_compare = new TTree("eval_track_compare", "Compare original and refit tracks");
+	_eval_track_compare->Branch("pT_true", &_eval_tc_pT_true, "pT_true/D");
+	_eval_track_compare->Branch("p_true", &_eval_tc_p_true, "p_true/D");
+	_eval_track_compare->Branch("pT_orig", &_eval_tc_pT_orig, "pT_orig/D");
+	_eval_track_compare->Branch("pT_error_orig", &_eval_tc_pT_error_orig, "pT_error_orig/D");
+	_eval_track_compare->Branch("dca2d_orig", &_eval_tc_dca2d_orig, "dca2d_orig/D");
+	_eval_track_compare->Branch("dca2d_error_orig", &_eval_tc_dca2d_error_orig, "dca2d_error_orig/D");
+
+	_eval_track_compare->Branch("pT_refit", &_eval_tc_pT_refit, "pT_refit/D");
+	_eval_track_compare->Branch("pT_error_refit", &_eval_tc_pT_error_refit, "pT_error_refit/D");
+	_eval_track_compare->Branch("dca2d_refit", &_eval_tc_dca2d_refit, "dca2d_refit/D");
+	_eval_track_compare->Branch("dca2d_error_refit", &_eval_tc_dca2d_error_refit, "dca2d_error_refit/D");
+
 	if (_fit_primary_tracks)
 		_eval_tree->Branch("PrimSvtxTrack", _tca_primtrackmap);
 	_eval_tree->Branch("SvtxVertexRefit", _tca_vertexmap_refit);
@@ -487,6 +514,17 @@ void PHG4TrackKalmanFitter::reset_eval_variables() {
 	if (_fit_primary_tracks)
 		_tca_primtrackmap->Clear();
 	_tca_vertexmap_refit->Clear();
+
+	_eval_tc_pT_true = WILD_DOULBE;
+	_eval_tc_p_true = WILD_DOULBE;
+	_eval_tc_pT_orig = WILD_DOULBE;
+	_eval_tc_pT_error_orig = WILD_DOULBE;
+	_eval_tc_dca2d_orig = WILD_DOULBE;
+	_eval_tc_dca2d_error_orig = WILD_DOULBE;
+	_eval_tc_pT_refit = WILD_DOULBE;
+	_eval_tc_pT_error_refit = WILD_DOULBE;
+	_eval_tc_dca2d_refit = WILD_DOULBE;
+	_eval_tc_dca2d_error_refit = WILD_DOULBE;
 }
 
 int PHG4TrackKalmanFitter::CreateNodes(PHCompositeNode *topNode) {
@@ -921,6 +959,60 @@ SvtxTrack* PHG4TrackKalmanFitter::MakeSvtxTrack(const SvtxTrack* svtx_track,
 	}
 
 	return out_track;
+}
+
+void PHG4TrackKalmanFitter::fill_eval_tree_compare_track(
+		const PHG4Particle* particle, const SvtxTrack* track_orig,
+		const PHGenFit::Track* track_refit) {
+
+	_eval_tc_pT_true = sqrt(
+			particle->get_px() * particle->get_px()
+					+ particle->get_py() * particle->get_py());
+
+	_eval_tc_p_true = sqrt(
+			_eval_tc_pT_true * _eval_tc_pT_true
+					+ particle->get_pz() * particle->get_pz());
+
+	_eval_tc_pT_orig = track_orig->get_pt();
+	_eval_tc_pT_error_orig = WILD_DOULBE;
+	_eval_tc_dca2d_orig = track_orig->get_dca2d();
+	_eval_tc_dca2d_error_orig = track_orig->get_dca2d_error();
+
+	genfit::MeasuredStateOnPlane* state = track_refit->extrapolateToLine(TVector3(0,0,0),TVector3(0,0,1),0);
+
+	TVector3 pos(0,0,0);
+	TVector3 mom(0,0,0);
+	TMatrixDSym cov(6);
+
+	state->getPosMomCov(pos, mom, cov);
+	_eval_tc_pT_refit = mom.Pt();
+	_eval_tc_pT_error_refit = sqrt(cov(3, 3) + cov(4, 4));
+	double u = state->getState()[3];
+	double du2 = state->getCov()[3][3];
+	_eval_tc_dca2d_refit = u;
+	_eval_tc_dca2d_error_refit = sqrt(du2);
+	_eval_track_compare->Fill();
+}
+
+bool PHG4TrackKalmanFitter::is_match_truth(const PHG4Particle* particle,
+		const PHGenFit::Track* track, const int n_sigma) {
+	if(!particle or !track) return false;
+
+	genfit::MeasuredStateOnPlane* state = track->extrapolateToLine(TVector3(0,0,0),TVector3(0,0,1),0);
+
+	TVector3 pos(0,0,0);
+	TVector3 mom(0,0,0);
+	TMatrixDSym cov(6);
+
+	state->getPosMomCov(pos, mom, cov);
+
+	if(
+			abs(particle->get_px() - mom.Px()) < n_sigma * sqrt(cov(3,3)) and
+			abs(particle->get_py() - mom.Py()) < n_sigma * sqrt(cov(4,4)) and
+			abs(particle->get_pz() - mom.Pz()) < n_sigma * sqrt(cov(5,5))
+		) return true;
+
+	return false;
 }
 
 /*

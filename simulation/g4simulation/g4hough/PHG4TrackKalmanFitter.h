@@ -27,6 +27,7 @@ namespace PHGenFit {
 class Fitter;
 } /* namespace PHGenFit */
 
+class PHG4Particle;
 class SvtxTrackMap;
 class SvtxVertexMap;
 class SvtxVertex;
@@ -100,6 +101,9 @@ public:
 	}
 
 	void fill_eval_tree(PHCompositeNode*);
+	void fill_eval_tree_compare_track(const PHG4Particle* particle,
+			const SvtxTrack* track_orig, const PHGenFit::Track* track_refit);
+	bool is_match_truth(const PHG4Particle* particle, const PHGenFit::Track* track, const int n_sigma = 4);
 	void init_eval_tree();
 	void reset_eval_variables();
 
@@ -268,6 +272,18 @@ private:
 	TClonesArray* _tca_trackmap_refit;
 	TClonesArray* _tca_primtrackmap;
 	TClonesArray* _tca_vertexmap_refit;
+
+	TTree* _eval_track_compare;
+	double _eval_tc_pT_true;
+	double _eval_tc_p_true;
+	double _eval_tc_pT_orig;
+	double _eval_tc_pT_error_orig;
+	double _eval_tc_dca2d_orig;
+	double _eval_tc_dca2d_error_orig;
+	double _eval_tc_pT_refit;
+	double _eval_tc_pT_error_refit;
+	double _eval_tc_dca2d_refit;
+	double _eval_tc_dca2d_error_refit;
 
 	bool _do_evt_display;
 
