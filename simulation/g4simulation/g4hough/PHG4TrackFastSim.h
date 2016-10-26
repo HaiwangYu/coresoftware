@@ -74,6 +74,10 @@ public:
 		verbosity = verb; // SubsysReco verbosity
 	}
 
+	void fill_eval_tree_compare_track(const PHG4Particle* particle, const PHGenFit::Track* track_refit);
+	void init_eval_tree();
+	void reset_eval_variables();
+
 	bool is_do_evt_display() const {
 		return _do_evt_display;
 	}
@@ -242,6 +246,21 @@ public:
 		_primary_assumption_pid = primaryAssumptionPid;
 	}
 
+	bool is_do_eval() const {
+		return _do_eval;
+	}
+
+	void set_do_eval(bool doEval) {
+		_do_eval = doEval;
+	}
+
+	const std::string& get_eval_outname() const {
+		return _eval_outname;
+	}
+
+	void set_eval_outname(const std::string& evalOutname) {
+		_eval_outname = evalOutname;
+	}
 private:
 
 	/*!
@@ -355,7 +374,18 @@ private:
 	std::vector<std::string> _state_names;
 	std::vector<double> _state_location;
 
+	//! Evaluation
+	//! switch eval out
+	bool _do_eval;
 
+	std::string _eval_outname;
+	TTree* _eval_track_compare;
+	double _eval_tc_pT_true;
+	double _eval_tc_p_true;
+	double _eval_tc_pT_refit;
+	double _eval_tc_pT_error_refit;
+	double _eval_tc_dca2d_refit;
+	double _eval_tc_dca2d_error_refit;
 };
 
 #endif /*__PHG4TrackFastSim_H__*/

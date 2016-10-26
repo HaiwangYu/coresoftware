@@ -9,6 +9,7 @@
 #include <map>
 #include <utility>
 #include <fun4all/Fun4AllReturnCodes.h>
+#include <fun4all/PHTFileServer.h>
 #include <GenFit/AbsMeasurement.h>
 #include <GenFit/EventDisplay.h>
 #include <GenFit/MeasuredStateOnPlane.h>
@@ -25,6 +26,7 @@
 #include <TMatrixF.h>
 #include <TRandom.h>
 #include <TString.h>
+#include <TTree.h>
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4Particle.h>
 #include <g4main/PHG4TruthInfoContainer.h>
@@ -50,6 +52,8 @@
 #define LogWarning(exp)	std::cout<<"WARNING: "	<<__FILE__<<": "<<__LINE__<<": "<< exp <<"\n"
 
 #define _DEBUG_MODE_ 0
+
+#define WILD_DOULBE -999999
 
 //#define _N_DETECTOR_LAYER 5
 
@@ -159,11 +163,19 @@ int PHG4TrackFastSim::InitRun(PHCompositeNode *topNode) {
 
 	}
 
+	if (_do_eval) {
+		PHTFileServer::get().open(_eval_outname, "RECREATE");
+		init_eval_tree();
+	}
 
 	return Fun4AllReturnCodes::EVENT_OK;
 }
 
 int PHG4TrackFastSim::End(PHCompositeNode *topNode) {
+	if (_do_eval) {
+		PHTFileServer::get().cd(_eval_outname);
+		_eval_track_compare->Write();
+	}
 
 	if (_do_evt_display) {
 		_fitter->displayEvent();
@@ -274,6 +286,10 @@ int PHG4TrackFastSim::process_event(PHCompositeNode *topNode) {
 				particle->get_track_id());
 
 		if(svtx_track_out) _trackmap_out->insert(svtx_track_out);
+
+		if (_do_eval) {
+			fill_eval_tree_compare_track(particle, track);
+		}
 
 	} // Loop all primary particles
 
@@ -461,6 +477,60 @@ int PHG4TrackFastSim::PseudoPatternRecognition(const PHG4Particle* particle,
 	} /*Loop detector layers*/
 
 	return Fun4AllReturnCodes::EVENT_OK;
+}
+
+void PHG4TrackFastSim::fill_eval_tree_compare_track(
+		const PHG4Particle* particle, const PHGenFit::Track* track_refit) {
+
+	_eval_tc_pT_true = sqrt(
+			particle->get_px() * particle->get_px()
+					+ particle->get_py() * particle->get_py());
+
+	_eval_tc_p_true = sqrt(
+			_eval_tc_pT_true * _eval_tc_pT_true
+					+ particle->get_pz() * particle->get_pz());
+
+	genfit::MeasuredStateOnPlane* state = track_refit->extrapolateToLine(
+			TVector3(0, 0, 0), TVector3(0, 0, 1), 0);
+
+	TVector3 pos(0, 0, 0);
+	TVector3 mom(0, 0, 0);
+	TMatrixDSym cov(6);
+
+	state->getPosMomCov(pos, mom, cov);
+	_eval_tc_pT_refit = mom.Pt();
+	_eval_tc_pT_error_refit = sqrt(cov(3, 3) + cov(4, 4));
+	double u = state->getState()[3];
+	double du2 = state->getCov()[3][3];
+	_eval_tc_dca2d_refit = u;
+	_eval_tc_dca2d_error_refit = sqrt(du2);
+	_eval_track_compare->Fill();
+}
+
+void PHG4TrackFastSim::init_eval_tree() {
+	_eval_track_compare = new TTree("eval_track_compare",
+			"Compare original and refit tracks");
+	_eval_track_compare->Branch("pT_true", &_eval_tc_pT_true, "pT_true/D");
+	_eval_track_compare->Branch("p_true", &_eval_tc_p_true, "p_true/D");
+
+	_eval_track_compare->Branch("pT_refit", &_eval_tc_pT_refit, "pT_refit/D");
+	_eval_track_compare->Branch("pT_error_refit", &_eval_tc_pT_error_refit,
+			"pT_error_refit/D");
+	_eval_track_compare->Branch("dca2d_refit", &_eval_tc_dca2d_refit,
+			"dca2d_refit/D");
+	_eval_track_compare->Branch("dca2d_error_refit",
+			&_eval_tc_dca2d_error_refit, "dca2d_error_refit/D");
+
+}
+
+void PHG4TrackFastSim::reset_eval_variables() {
+
+	_eval_tc_pT_true = WILD_DOULBE;
+	_eval_tc_p_true = WILD_DOULBE;
+	_eval_tc_pT_refit = WILD_DOULBE;
+	_eval_tc_pT_error_refit = WILD_DOULBE;
+	_eval_tc_dca2d_refit = WILD_DOULBE;
+	_eval_tc_dca2d_error_refit = WILD_DOULBE;
 }
 
 SvtxTrack* PHG4TrackFastSim::MakeSvtxTrack(const PHGenFit::Track* phgf_track,
