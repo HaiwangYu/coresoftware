@@ -365,6 +365,10 @@ private:
 	//! Evaluation
 	//! switch eval out
 	bool _do_eval;
+	//!
+	int _N_STATES;
+	std::vector<std::string> _state_names;
+	std::vector<double> _state_location;
 
 	std::string _eval_outname;
 	TTree* _eval_track_compare;

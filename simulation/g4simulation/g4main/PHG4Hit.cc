@@ -27,6 +27,7 @@ PHG4Hit::Copy(PHG4Hit const &g4hit)
 	  set_property_nocheck(prop_id,g4hit.get_property_nocheck(prop_id));
 	}
     }
+  set_hit_type(g4hit.get_hit_type()); 
 }
 
 
@@ -134,6 +135,8 @@ case  prop_local_pos_x_1:
     return make_pair("local y pos out",PHG4Hit::type_float);
   case  prop_local_pos_z_1:
     return make_pair("local z pos out",PHG4Hit::type_float);
+  case   prop_hit_type:
+    return make_pair("hit type",PHG4Hit::type_int);    
   default:
     cout << "PHG4Hit::get_property_info - Fatal Error - unknown index " << prop_id << endl;
     exit(1);

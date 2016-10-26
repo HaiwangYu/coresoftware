@@ -115,6 +115,52 @@ int PHG4TrackFastSim::InitRun(PHCompositeNode *topNode) {
 		init_eval_tree();
 	}
 
+	// tower geometry for track states
+
+	for (int i = 0; i < _N_STATES; i++) {
+
+	  if( (_state_names[i]=="FHCAL") || (_state_names[i]=="FEMC") ){
+	    
+	    // Get the z-location of the detector plane
+
+	    string towergeonodename = "TOWERGEOM_" + _state_names[i];
+	    RawTowerGeomContainer *towergeo = findNode::getClass<RawTowerGeomContainer>(topNode,towergeonodename.c_str());
+	    if (!towergeo) {
+	      cerr << PHWHERE << " ERROR: Can't find node " << towergeonodename << endl;
+	      return Fun4AllReturnCodes::ABORTEVENT;
+	    }
+
+	    // Grab the first tower, us it to get the 
+	    // location along the beamline 
+	    RawTowerGeomContainer::ConstRange twr_range = towergeo->get_tower_geometries();
+	    RawTowerGeomContainer::ConstIterator twr_iter = twr_range.first; 
+	    RawTowerGeom *temp_geo = twr_iter->second; 
+
+	    _state_location.push_back(temp_geo->get_center_z() - (temp_geo->get_size_z()/2.0)); 
+
+	  } else if( (_state_names[i]=="CEMC") || (_state_names[i]=="IHCAL") || (_state_names[i]=="OHCAL")){
+
+	    // Get the calorimeter radius
+
+	    string nodename = "TOWERGEOM_" + _state_names[i];
+	    RawTowerGeomContainer *geo = findNode::getClass<RawTowerGeomContainer>(topNode,nodename.c_str());
+	    if (geo) {  
+	      _state_location.push_back(geo->get_radius());
+	    }
+	    else{
+	      cerr << PHWHERE << " ERROR: Can't find node " << nodename << endl;
+	      return Fun4AllReturnCodes::ABORTEVENT;
+	    }
+
+	  }
+	  else{
+	    cerr << PHWHERE << " ERROR: Unrecognized detector name for state projection:  " << _state_names[i] << endl;
+	    return Fun4AllReturnCodes::ABORTEVENT;	    
+	  }
+
+	}
+
+
 	return Fun4AllReturnCodes::EVENT_OK;
 }
 
