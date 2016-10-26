@@ -163,7 +163,7 @@ private:
  * Constructor
  */
 PHG4TrackKalmanFitter::PHG4TrackKalmanFitter(const string &name) :
-		SubsysReco(name), _flags(NONE), _detector_type(MAPS_TPC), _output_mode(OverwriteOriginalNode), _fit_primary_tracks(
+		SubsysReco(name), _flags(NONE), _detector_type(MAPS_LADDERS_TPC), _output_mode(OverwriteOriginalNode), _fit_primary_tracks(
 				true), _mag_field_file_name(
 				"/phenix/upgrades/decadal/fieldmaps/sPHENIX.2d.root"), _mag_field_re_scaling_factor(
 				1.4 / 1.5), _reverse_mag_field(true), _fitter( NULL), _track_fitting_alg_name(
@@ -650,7 +650,7 @@ PHGenFit::Track* PHG4TrackKalmanFitter::ReFitTrack(PHCompositeNode * topNode, co
 	PHG4CylinderCellContainer* cells = NULL;
 	SvtxHitMap* hitsmap = NULL;
 
-	if (_detector_type == MAPS_TPC) {
+	if (_detector_type == MAPS_LADDERS_TPC) {
 		// get node containing the digitized hits
 		hitsmap = findNode::getClass<SvtxHitMap>(topNode, "SvtxHitMap");
 		if (!hitsmap) {
@@ -805,7 +805,7 @@ PHGenFit::Track* PHG4TrackKalmanFitter::ReFitTrack(PHCompositeNode * topNode, co
 
 		unsigned int layer = cluster->get_layer();
 		//std::cout << "cluster layer: " << layer << std::endl;
-		if (_detector_type == MAPS_TPC and layer < 3) {
+		if (_detector_type == MAPS_LADDERS_TPC and layer < 3) {
 
 			unsigned int begin_hit_id = *(cluster->begin_hits());
 			//LogDebug(begin_hit_id);
