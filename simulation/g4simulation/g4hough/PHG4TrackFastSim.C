@@ -22,13 +22,11 @@
 #include <phool/PHIODataNode.h>
 #include <phool/PHNodeIterator.h>
 
+#include <TTree.h>
 #include <TMath.h>
 #include <TMatrixF.h>
 #include <TRandom.h>
 #include <TString.h>
-#include <TTree.h>
-#include <g4hough/SvtxTrackMap.h>
-#include <g4hough/SvtxTrackMap_v1.h>
 #include <g4main/PHG4Hit.h>
 #include <g4main/PHG4Particle.h>
 #include <g4main/PHG4TruthInfoContainer.h>
@@ -37,6 +35,13 @@
 #include <phgenfit/Track.h>
 #include <phgeom/PHGeomUtility.h>
 #include <phgenfit/SpacepointMeasurement.h>
+#include <g4cemc/RawTowerGeom.h>
+#include <g4cemc/RawTowerGeomContainer.h>
+
+#include "SvtxTrackMap.h"
+#include "SvtxTrackMap_v1.h"
+#include "SvtxTrackState.h"
+#include "SvtxTrackState_v1.h"
 #include "SvtxTrack.h"
 #include "SvtxTrack_FastSim.h"
 
