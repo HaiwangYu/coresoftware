@@ -480,7 +480,7 @@ void PHG4TrackKalmanFitter::init_eval_tree() {
 	_eval_tree->Branch("SvtxVertex", _tca_vertexmap);
 	_eval_tree->Branch("SvtxTrackRefit", _tca_trackmap_refit);
 
-	_eval_track_compare = new TTree("eval_track_compare", "Compare original and refit tracks");
+	_eval_track_compare = new TTree("PHG4TrackKalmanFitter_eval_track_compare", "Compare original and refit tracks");
 	_eval_track_compare->Branch("pT_true", &_eval_tc_pT_true, "pT_true/D");
 	_eval_track_compare->Branch("p_true", &_eval_tc_p_true, "p_true/D");
 	_eval_track_compare->Branch("pT_orig", &_eval_tc_pT_orig, "pT_orig/D");
@@ -663,8 +663,9 @@ PHGenFit::Track* PHG4TrackKalmanFitter::ReFitTrack(const SvtxTrack* intrack,
 	}
 
 	// prepare seed from input SvtxTrack
-	TVector3 seed_mom(intrack->get_px(), intrack->get_py(), intrack->get_pz());
-	TVector3 seed_pos(intrack->get_x(), intrack->get_y(), intrack->get_z());
+	//TODO check initial seed setup later
+	TVector3 seed_mom(100,0,0);
+	TVector3 seed_pos(0,0,0);
 	TMatrixDSym seed_cov(6);
 	for (int i = 0; i < 6; i++) {
 		for (int j = 0; j < 6; j++) {

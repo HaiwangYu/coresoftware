@@ -70,7 +70,8 @@ PHG4TrackFastSim::PHG4TrackFastSim(const std::string &name) :
 				false), _use_vertex_in_fitting(true), _vertex_xy_resolution(
 				50E-4), _vertex_z_resolution(50E-4), _phi_resolution(50E-4), _r_resolution(
 				1.), _z_resolution(50E-4), _pat_rec_hit_finding_eff(1.), _pat_rec_noise_prob(0.), 
-		                _N_DETECTOR_LAYER(5), _N_STATES(0) {
+		                _N_DETECTOR_LAYER(5), _N_STATES(0), _do_eval(true), _eval_outname(
+				"PHG4TrackFastSim_eval.root"), _eval_track_compare(NULL) {
 
 	_event = -1;
 
@@ -508,7 +509,7 @@ void PHG4TrackFastSim::fill_eval_tree_compare_track(
 }
 
 void PHG4TrackFastSim::init_eval_tree() {
-	_eval_track_compare = new TTree("eval_track_compare",
+	_eval_track_compare = new TTree("PHG4TrackFastSim_eval_track_compare",
 			"Compare original and refit tracks");
 	_eval_track_compare->Branch("pT_true", &_eval_tc_pT_true, "pT_true/D");
 	_eval_track_compare->Branch("p_true", &_eval_tc_p_true, "p_true/D");
