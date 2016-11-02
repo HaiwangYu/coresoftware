@@ -16,6 +16,7 @@
 #include <g4main/PHG4Particle.h>
 #include <g4main/PHG4Particlev2.h>
 #include <g4main/PHG4VtxPointv1.h>
+#include <GenFit/PlanarMeasurement.h>
 #include <GenFit/FieldManager.h>
 #include <GenFit/GFRaveVertex.h>
 #include <GenFit/GFRaveVertexFactory.h>
@@ -155,7 +156,7 @@ PHG4TrackKalmanFitter::PHG4TrackKalmanFitter(const string &name) :
 		NULL), _tca_particlemap(NULL), _tca_vtxmap(NULL), _tca_trackmap(NULL), _tca_vertexmap(
 		NULL), _tca_trackmap_refit(NULL), _tca_primtrackmap(NULL), _tca_vertexmap_refit(
 		NULL), _eval_track_compare(NULL), _do_evt_display(false) {
-	_event = 0;
+	_event = -1;
 }
 
 /*
@@ -791,6 +792,14 @@ PHGenFit::Track* PHG4TrackKalmanFitter::ReFitTrack(const SvtxTrack* intrack,
 		TVector3 pos(cluster->get_x(), cluster->get_y(), cluster->get_z());
 		TVector3 n(cluster->get_x(), cluster->get_y(), 0);
 
+		//DEBUG: hard coded to use the correct cluster radius
+#if _DEBUG_MODE_ == 2
+		if(pos.Pt()<10) {
+			pos.SetPerp(pos.Perp()+0.0050/2.);
+		} else {
+			pos.SetPerp(pos.Perp()+0.8333/2.);
+		}
+#endif
 		//TODO use u, v explicitly?
 		PHGenFit::Measurement* meas = new PHGenFit::PlanarMeasurement(pos, n,
 				cluster->get_phi_size(), cluster->get_z_size());
@@ -798,6 +807,20 @@ PHGenFit::Track* PHG4TrackKalmanFitter::ReFitTrack(const SvtxTrack* intrack,
 		//meas->getMeasurement()->Print();// DEBUG
 
 		measurements.push_back(meas);
+	}
+
+
+	if (verbosity >= 0) {
+		LogDebug("");
+		std::cout << "event: " << _event << "\n";
+		for(unsigned int i=0;i<measurements.size();i++) {
+			std::cout << " : measurement: " << i << "\n";
+			measurements[i]->getMeasurement()->Print();
+			//dynamic_cast<genfit::PlanarMeasurement*>(measurements[i]->getMeasurement())->constructPlane(genfit::StateOnPlane()).get()->Print();
+			genfit::SharedPlanePtr plane_ptr = dynamic_cast<genfit::PlanarMeasurement*>(measurements[i]->getMeasurement())->constructPlane(genfit::StateOnPlane());
+			TVector3 O = plane_ptr->getO();
+			std::cout<<"Cluster: Plane O radius: "<<O.Pt()<<"\n";
+		}
 	}
 
 	//TODO unsorted measurements, should use sorted ones?

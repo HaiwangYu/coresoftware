@@ -11,6 +11,7 @@
 #include <fun4all/Fun4AllReturnCodes.h>
 #include <fun4all/PHTFileServer.h>
 #include <GenFit/AbsMeasurement.h>
+#include <GenFit/PlanarMeasurement.h>
 #include <GenFit/EventDisplay.h>
 #include <GenFit/MeasuredStateOnPlane.h>
 #include <GenFit/RKTrackRep.h>
@@ -235,6 +236,19 @@ int PHG4TrackFastSim::process_event(PHCompositeNode *topNode) {
 		PseudoPatternRecognition(particle, measurements, seed_pos, seed_mom,
 				seed_cov);
 
+		if (verbosity >= 2) {
+			LogDebug("");
+			std::cout << "event: " << _event << "\n";
+			for(unsigned int i=0;i<measurements.size();i++) {
+				std::cout << " : measurement: " << i << "\n";
+				measurements[i]->getMeasurement()->Print();
+				//dynamic_cast<genfit::PlanarMeasurement*>(measurements[i]->getMeasurement())->constructPlane(genfit::StateOnPlane()).get()->Print();
+				genfit::SharedPlanePtr plane_ptr = dynamic_cast<genfit::PlanarMeasurement*>(measurements[i]->getMeasurement())->constructPlane(genfit::StateOnPlane());
+				TVector3 O = plane_ptr->getO();
+				std::cout<<"PHG4Hit: Plane O radius: "<<O.Pt()<<"\n";
+			}
+		}
+
 		if (measurements.size() < 3) {
 			if (verbosity >= 2) {
 				//LogWarning("measurements.size() < 3");
@@ -393,10 +407,10 @@ int PHG4TrackFastSim::GetNodes(PHCompositeNode * topNode) {
 
 int PHG4TrackFastSim::PseudoPatternRecognition(const PHG4Particle* particle,
 		std::vector<PHGenFit::Measurement*>& meas_out, TVector3& seed_pos,
-		TVector3& seed_mom, TMatrixDSym& seed_cov, const bool do_smearing) {
+		TVector3& seed_mom, TMatrixDSym& seed_cov, const bool use_smeared_truth_as_seed) {
 
 	seed_pos.SetXYZ(0, 0, 0);
-	seed_mom.SetXYZ(0, 0, 10);
+	seed_mom.SetXYZ(100, 0, 0);
 	seed_cov.ResizeTo(6, 6);
 
 	for (int i = 0; i < 3; i++) {
@@ -411,9 +425,9 @@ int PHG4TrackFastSim::PseudoPatternRecognition(const PHG4Particle* particle,
 		TVector3 True_mom(particle->get_px(), particle->get_py(),
 				particle->get_pz());
 
-		seed_mom.SetXYZ(particle->get_px(), particle->get_py(),
-				particle->get_pz());
-		if (do_smearing) {
+		//seed_mom.SetXYZ(particle->get_px(), particle->get_py(),
+		//		particle->get_pz());
+		if (use_smeared_truth_as_seed) {
 			const double momSmear = 3. / 180. * TMath::Pi();     // rad
 			const double momMagSmear = 0.1;   // relative
 

@@ -278,7 +278,7 @@ private:
 	 */
 	int PseudoPatternRecognition(const PHG4Particle* particle,
 			std::vector<PHGenFit::Measurement*> & meas_out, TVector3& seed_pos,
-			TVector3& seed_mom, TMatrixDSym& seed_cov, const bool do_smearing = true);
+			TVector3& seed_mom, TMatrixDSym& seed_cov, const bool use_smeared_truth_as_seed = false);
 
 	PHGenFit::PlanarMeasurement* PHG4HitToMeasurementVerticalPlane(const PHG4Hit* g4hit, const double phi_resolution, const double r_resolution);
 
