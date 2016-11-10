@@ -9,9 +9,13 @@
 
 #include <fun4all/Fun4AllReturnCodes.h>
 #include <fun4all/PHTFileServer.h>
+#include <g4detectors/PHG4CylinderCellContainer.h>
+#include <g4detectors/PHG4CylinderGeomContainer.h>
 #include <g4hough/SvtxCluster.h>
 #include <g4hough/SvtxClusterMap.h>
 #include <g4hough/SvtxTrackState_v1.h>
+#include <g4main/PHG4Hit.h>
+#include <g4main/PHG4HitContainer.h>
 #include <g4main/PHG4TruthInfoContainer.h>
 #include <g4main/PHG4Particle.h>
 #include <g4main/PHG4Particlev2.h>
@@ -51,6 +55,8 @@
 #include "SvtxTrackMap.h"
 #include "SvtxTrackMap_v1.h"
 #include "SvtxVertexMap_v1.h"
+#include "SvtxHit.h"
+#include "SvtxHitMap.h"
 
 #define LogDebug(exp)		std::cout<<"DEBUG: "<<__FILE__<<": "<<__LINE__<<": "<< #exp <<" : "<< exp <<"\n"
 #define LogError(exp)		std::cout<<"ERROR: "<<__FILE__<<": "<<__LINE__<<": "<< exp <<"\n"
@@ -246,7 +252,7 @@ int PHG4TrackKalmanFitter::process_event(PHCompositeNode *topNode) {
 	for (SvtxTrackMap::Iter iter = _trackmap->begin(); iter != _trackmap->end();
 			++iter) {
 		//! stands for Refit_PHGenFit_Track
-		PHGenFit::Track* rf_phgf_track = ReFitTrack(iter->second);
+		PHGenFit::Track* rf_phgf_track = ReFitTrack(topNode, iter->second);
 #if _DEBUG_MODE_ == 1
 		//rf_phgf_track->getGenFitTrack()->Print();
 #endif
@@ -339,7 +345,7 @@ int PHG4TrackKalmanFitter::process_event(PHCompositeNode *topNode) {
 				/*!
 				 * rf_phgf_track stands for Refit_PHGenFit_Track
 				 */
-				PHGenFit::Track* rf_phgf_track = ReFitTrack(iter->second,
+				PHGenFit::Track* rf_phgf_track = ReFitTrack(topNode, iter->second,
 						vertex);
 				if (rf_phgf_track) {
 					//FIXME figure out which vertex to use.
@@ -656,10 +662,39 @@ int PHG4TrackKalmanFitter::GetNodes(PHCompositeNode * topNode) {
  * \param intrack Input SvtxTrack
  * \param invertex Input Vertex, if fit track as a primary vertex
  */
-PHGenFit::Track* PHG4TrackKalmanFitter::ReFitTrack(const SvtxTrack* intrack,
+PHGenFit::Track* PHG4TrackKalmanFitter::ReFitTrack(PHCompositeNode * topNode, const SvtxTrack* intrack,
 		const SvtxVertex* invertex) {
 	if (!intrack) {
 		cerr << PHWHERE << " Input SvtxTrack is NULL!" << endl;
+		return NULL;
+	}
+
+	SvtxHitMap* hitsmap = NULL;
+
+	PHG4CylinderCellContainer* cells = NULL;
+
+	PHG4HitContainer* phg4hitcontainer = NULL;
+
+	// get node containing the digitized hits
+	hitsmap = findNode::getClass<SvtxHitMap>(topNode, "SvtxHitMap");
+	if (!hitsmap) {
+		cout << PHWHERE << "ERROR: Can't find node SvtxHitMap" << endl;
+		return NULL;
+	}
+
+	cells = findNode::getClass<PHG4CylinderCellContainer>(topNode,
+			"G4CELL_SVTX");
+	if (!cells) {
+		cout << PHWHERE << "ERROR: Can't find node G4CELL_SVTX" << endl;
+		return NULL;
+	}
+
+	phg4hitcontainer = findNode::getClass<PHG4HitContainer>(
+			topNode, "G4HIT_SVTX");
+
+	if (!phg4hitcontainer && _event < 2) {
+		cout << PHWHERE << "G4HIT_SVTX"
+				<< " node not found on node tree" << endl;
 		return NULL;
 	}
 
@@ -785,6 +820,15 @@ PHGenFit::Track* PHG4TrackKalmanFitter::ReFitTrack(const SvtxTrack* intrack,
 			LogError("No cluster Found!");
 			continue;
 		}
+		SvtxHit* svtxhit = hitsmap->find(*cluster->begin_hits())->second;
+		PHG4CylinderCell* cell = (PHG4CylinderCell*) cells->findCylinderCell(svtxhit->get_cellid());
+		PHG4Hit *phg4hit = phg4hitcontainer->findHit(cell->get_g4hits().first->first);
+		LogDebug("");
+		if(!phg4hit) continue;
+		if(phg4hit->get_trkid() < 0) {
+			phg4hit->identify();
+			continue;
+		}
 		//cluster->identify(); //DEBUG
 
 		//unsigned int l = cluster->get_layer();
@@ -815,11 +859,13 @@ PHGenFit::Track* PHG4TrackKalmanFitter::ReFitTrack(const SvtxTrack* intrack,
 		std::cout << "event: " << _event << "\n";
 		for(unsigned int i=0;i<measurements.size();i++) {
 			std::cout << " : measurement: " << i << "\n";
-			measurements[i]->getMeasurement()->Print();
+			//measurements[i]->getMeasurement()->Print();
 			//dynamic_cast<genfit::PlanarMeasurement*>(measurements[i]->getMeasurement())->constructPlane(genfit::StateOnPlane()).get()->Print();
 			genfit::SharedPlanePtr plane_ptr = dynamic_cast<genfit::PlanarMeasurement*>(measurements[i]->getMeasurement())->constructPlane(genfit::StateOnPlane());
 			TVector3 O = plane_ptr->getO();
-			std::cout<<"Cluster: Plane O radius: "<<O.Pt()<<"\n";
+			std::cout<<"Cluster: "<<
+					O.X() <<","<<O.Y() <<","<<O.Z() <<". "
+					<<"radius: "<<O.Pt()<<"\n";
 		}
 	}
 
