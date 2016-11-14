@@ -820,21 +820,35 @@ PHGenFit::Track* PHG4TrackKalmanFitter::ReFitTrack(PHCompositeNode * topNode, co
 			LogError("No cluster Found!");
 			continue;
 		}
+
 		SvtxHit* svtxhit = hitsmap->find(*cluster->begin_hits())->second;
 		PHG4CylinderCell* cell = (PHG4CylinderCell*) cells->findCylinderCell(svtxhit->get_cellid());
 		PHG4Hit *phg4hit = phg4hitcontainer->findHit(cell->get_g4hits().first->first);
-		LogDebug("");
+
 		if(!phg4hit) continue;
-		if(phg4hit->get_trkid() < 0) {
-			phg4hit->identify();
+		if(phg4hit->get_trkid()!=1) {
+			LogDebug("phg4hit->get_trkid()!=1");
 			continue;
 		}
+
+		TVector3 phg4hit_position(phg4hit->get_avg_x(),phg4hit->get_avg_y(),phg4hit->get_avg_z());
 		//cluster->identify(); //DEBUG
+		TVector3 cluster_position(cluster->get_x(),cluster->get_y(),cluster->get_z());
+
+		//if(cluster_position.Perp()<10.) continue;//DEBUG
+
+		LogDebug("");
+		cout<<"hit: \t ("<<phg4hit_position.X()<<","<<phg4hit_position.Y()<<","<<phg4hit_position.Z()<<"), r = "<<phg4hit_position.Perp()<<endl;
+		cout<<"cluster: \t ("<<cluster_position.X()<<","<<cluster_position.Y()<<","<<cluster_position.Z()<<"), r = "<<cluster_position.Perp()<<endl;
+
 
 		//unsigned int l = cluster->get_layer();
-
 		TVector3 pos(cluster->get_x(), cluster->get_y(), cluster->get_z());
 		TVector3 n(cluster->get_x(), cluster->get_y(), 0);
+		//TVector3 pos(phg4hit_position.X(), phg4hit_position.Y(), phg4hit_position.Z());
+		//TVector3 n(phg4hit_position.X(), phg4hit_position.Y(), 0);
+		TVector3 v(0, 0, 1);
+		TVector3 u = v.Cross(n);
 
 		//DEBUG: hard coded to use the correct cluster radius
 #if _DEBUG_MODE_ == 2
@@ -845,7 +859,7 @@ PHGenFit::Track* PHG4TrackKalmanFitter::ReFitTrack(PHCompositeNode * topNode, co
 		}
 #endif
 		//TODO use u, v explicitly?
-		PHGenFit::Measurement* meas = new PHGenFit::PlanarMeasurement(pos, n,
+		PHGenFit::Measurement* meas = new PHGenFit::PlanarMeasurement(pos, u, v,
 				cluster->get_phi_size(), cluster->get_z_size());
 
 		//meas->getMeasurement()->Print();// DEBUG
