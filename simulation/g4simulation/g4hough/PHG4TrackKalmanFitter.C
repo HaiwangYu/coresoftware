@@ -58,9 +58,9 @@
 #include "SvtxHit.h"
 #include "SvtxHitMap.h"
 
-#define LogDebug(exp)		std::cout<<"DEBUG: "<<__FILE__<<": "<<__LINE__<<": "<< #exp <<" : "<< exp <<"\n"
-#define LogError(exp)		std::cout<<"ERROR: "<<__FILE__<<": "<<__LINE__<<": "<< exp <<"\n"
-#define LogWarning(exp)	std::cout<<"WARNING: "<<__FILE__<<": "<<__LINE__<<": "<< exp <<"\n"
+#define LogDebug(exp)		std::cout<<"DEBUG: "	<<__FILE__<<": "<<__LINE__<<": "<< exp <<"\n"
+#define LogError(exp)		std::cout<<"ERROR: "	<<__FILE__<<": "<<__LINE__<<": "<< exp <<"\n"
+#define LogWarning(exp)	std::cout<<"WARNING: "	<<__FILE__<<": "<<__LINE__<<": "<< exp <<"\n"
 
 #define WILD_DOULBE -999999
 
@@ -251,6 +251,10 @@ int PHG4TrackKalmanFitter::process_event(PHCompositeNode *topNode) {
 
 	for (SvtxTrackMap::Iter iter = _trackmap->begin(); iter != _trackmap->end();
 			++iter) {
+		//begin DEBUG
+		LogDebug("event: ");
+		cout<<_event<<" : "<<iter->second->get_pt()<< " ==> "<<endl;;
+		//end DEBUG
 		//! stands for Refit_PHGenFit_Track
 		PHGenFit::Track* rf_phgf_track = ReFitTrack(topNode, iter->second);
 #if _DEBUG_MODE_ == 1
@@ -303,7 +307,7 @@ int PHG4TrackKalmanFitter::process_event(PHCompositeNode *topNode) {
 			//vertex = NULL; //DEBUG
 			SvtxTrack* rf_track = MakeSvtxTrack(iter->second, rf_phgf_track,
 					vertex);
-
+			cout<<" ==> "<<rf_track->get_pt()<<endl;//DEBUG
 			if(_do_eval) {
 				PHG4Particle* particle = NULL;
 			    for (PHG4TruthInfoContainer::ConstIterator it =
@@ -868,20 +872,20 @@ PHGenFit::Track* PHG4TrackKalmanFitter::ReFitTrack(PHCompositeNode * topNode, co
 	}
 
 
-	if (verbosity >= 0) {
-		LogDebug("");
-		std::cout << "event: " << _event << "\n";
-		for(unsigned int i=0;i<measurements.size();i++) {
-			std::cout << " : measurement: " << i << "\n";
-			//measurements[i]->getMeasurement()->Print();
-			//dynamic_cast<genfit::PlanarMeasurement*>(measurements[i]->getMeasurement())->constructPlane(genfit::StateOnPlane()).get()->Print();
-			genfit::SharedPlanePtr plane_ptr = dynamic_cast<genfit::PlanarMeasurement*>(measurements[i]->getMeasurement())->constructPlane(genfit::StateOnPlane());
-			TVector3 O = plane_ptr->getO();
-			std::cout<<"Cluster: "<<
-					O.X() <<","<<O.Y() <<","<<O.Z() <<". "
-					<<"radius: "<<O.Pt()<<"\n";
-		}
-	}
+//	if (verbosity >= 0) {
+//		LogDebug("");
+//		std::cout << "event: " << _event << "\n";
+//		for(unsigned int i=0;i<measurements.size();i++) {
+//			std::cout << " : measurement: " << i << "\n";
+//			//measurements[i]->getMeasurement()->Print();
+//			//dynamic_cast<genfit::PlanarMeasurement*>(measurements[i]->getMeasurement())->constructPlane(genfit::StateOnPlane()).get()->Print();
+//			genfit::SharedPlanePtr plane_ptr = dynamic_cast<genfit::PlanarMeasurement*>(measurements[i]->getMeasurement())->constructPlane(genfit::StateOnPlane());
+//			TVector3 O = plane_ptr->getO();
+//			std::cout<<"Cluster: "<<
+//					O.X() <<","<<O.Y() <<","<<O.Z() <<". "
+//					<<"radius: "<<O.Pt()<<"\n";
+//		}
+//	}
 
 	//TODO unsorted measurements, should use sorted ones?
 	track->addMeasurements(measurements);
@@ -891,7 +895,7 @@ PHGenFit::Track* PHG4TrackKalmanFitter::ReFitTrack(PHCompositeNode * topNode, co
 	 *  ret code 0 means 0 error or good status
 	 */
 	if (_fitter->processTrack(track, false) != 0) {
-		if (verbosity >= 1)
+		if (verbosity >= 0) //DEBUG, shoudl be verbosity 1 level
 			LogWarning("Track fitting failed");
 		return NULL;
 	}

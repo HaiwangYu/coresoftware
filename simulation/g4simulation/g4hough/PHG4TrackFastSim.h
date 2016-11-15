@@ -380,6 +380,7 @@ private:
 
 	std::string _eval_outname;
 	TTree* _eval_track_compare;
+	int _eval_tc_is_reconstructed_by_alan;
 	double _eval_tc_pT_true;
 	double _eval_tc_p_true;
 	double _eval_tc_pT_refit;

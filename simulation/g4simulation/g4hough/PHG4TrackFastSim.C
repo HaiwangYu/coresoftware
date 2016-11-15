@@ -190,6 +190,10 @@ int PHG4TrackFastSim::process_event(PHCompositeNode *topNode) {
 
 	_event++;
 
+	if(_do_eval) {
+		reset_eval_variables();
+	}
+
 	if (verbosity >= 2)
 		std::cout << "PHG4TrackFastSim::process_event: " << _event << ".\n";
 
@@ -201,6 +205,20 @@ int PHG4TrackFastSim::process_event(PHCompositeNode *topNode) {
 //		LogError("_clustermap_out not found!");
 //		return Fun4AllReturnCodes::ABORTRUN;
 //	}
+
+	SvtxTrackMap* trackmap_alan = findNode::getClass<SvtxTrackMap>(topNode, "SvtxTrackMap");
+	if (!trackmap_alan && _event < 2) {
+		cout << PHWHERE << " SvtxClusterMap node not found on node tree"
+				<< endl;
+		return Fun4AllReturnCodes::ABORTEVENT;
+	}
+
+	if(trackmap_alan->size() > 0) {
+		SvtxTrack* track_alan = trackmap_alan->get(0);
+		if(track_alan)
+			if(track_alan->get_pt() > 10)
+				_eval_tc_is_reconstructed_by_alan = 1;
+	}
 
 	if (_trackmap_out)
 		_trackmap_out->empty();
@@ -525,6 +543,7 @@ void PHG4TrackFastSim::fill_eval_tree_compare_track(
 void PHG4TrackFastSim::init_eval_tree() {
 	_eval_track_compare = new TTree("PHG4TrackFastSim_eval_track_compare",
 			"Compare original and refit tracks");
+	_eval_track_compare->Branch("is_reconstructed_by_alan", &_eval_tc_is_reconstructed_by_alan, "is_reconstructed_by_alan/I");
 	_eval_track_compare->Branch("pT_true", &_eval_tc_pT_true, "pT_true/D");
 	_eval_track_compare->Branch("p_true", &_eval_tc_p_true, "p_true/D");
 
@@ -540,6 +559,7 @@ void PHG4TrackFastSim::init_eval_tree() {
 
 void PHG4TrackFastSim::reset_eval_variables() {
 
+	_eval_tc_is_reconstructed_by_alan = 0;
 	_eval_tc_pT_true = WILD_DOULBE;
 	_eval_tc_p_true = WILD_DOULBE;
 	_eval_tc_pT_refit = WILD_DOULBE;
