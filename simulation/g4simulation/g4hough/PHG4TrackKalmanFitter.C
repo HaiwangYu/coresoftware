@@ -294,7 +294,7 @@ int PHG4TrackKalmanFitter::process_event(PHCompositeNode *topNode) {
 			if (_vertexmap_refit->size() > 0)
 				vertex = _vertexmap_refit->get(0);
 
-			//vertex = NULL; //DEBUG
+			vertex = NULL; //DEBUG
 			SvtxTrack* rf_track = MakeSvtxTrack(iter->second, rf_phgf_track,
 					vertex);
 
@@ -792,17 +792,17 @@ PHGenFit::Track* PHG4TrackKalmanFitter::ReFitTrack(const SvtxTrack* intrack,
 		TVector3 pos(cluster->get_x(), cluster->get_y(), cluster->get_z());
 		TVector3 n(cluster->get_x(), cluster->get_y(), 0);
 
-		//DEBUG: hard coded to use the correct cluster radius
-#if _DEBUG_MODE_ == 2
-		if(pos.Pt()<10) {
-			pos.SetPerp(pos.Perp()+0.0050/2.);
-		} else {
-			pos.SetPerp(pos.Perp()+0.8333/2.);
+		double phi_error = cluster->get_phi_error();
+		double z_error = cluster->get_z_error();
+
+		if(pos.Perp()>10) {
+			phi_error = cluster->get_phi_size();
+			z_error = cluster->get_z_size();
 		}
-#endif
+
 		//TODO use u, v explicitly?
 		PHGenFit::Measurement* meas = new PHGenFit::PlanarMeasurement(pos, n,
-				cluster->get_phi_size(), cluster->get_z_size());
+				phi_error, z_error);
 
 		//meas->getMeasurement()->Print();// DEBUG
 
