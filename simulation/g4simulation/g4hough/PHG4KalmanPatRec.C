@@ -76,7 +76,7 @@
 #define LogError(exp)		std::cout<<"ERROR: "  <<__FILE__<<": "<<__LINE__<<": "<< exp
 #define LogWarning(exp)	std::cout<<"WARNING: "<<__FILE__<<": "<<__LINE__<<": "<< exp
 
-#define _DEBUG_
+//#define _DEBUG_
 
 //#define _GET_RPHI_ERROR_
 
