@@ -64,7 +64,7 @@ PHG4TrackFastSim::PHG4TrackFastSim(const std::string &name) :
 		/*_clustermap_out(NULL),*/_trackmap_out(NULL), _fitter(NULL), _mag_field_file_name(
 				"/phenix/upgrades/decadal/fieldmaps/fsPHENIX.2d.root"), _mag_field_re_scaling_factor(
 				1.), _reverse_mag_field(false), _fit_alg_name(
-				"KalmanFitterRefTrack"), _primary_assumption_pid(211), _do_evt_display(
+				"DafRef"), _primary_assumption_pid(211), _do_evt_display(
 				false), _use_vertex_in_fitting(true), _vertex_xy_resolution(
 				50E-4), _vertex_z_resolution(50E-4), _phi_resolution(50E-4), _r_resolution(
 				1.), _z_resolution(50E-4), _pat_rec_hit_finding_eff(1.), _pat_rec_noise_prob(0.), 
