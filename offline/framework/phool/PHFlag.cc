@@ -1,6 +1,6 @@
 #include "PHFlag.h"
 
-#include <phool/phool.h>
+#include "phool.h"
 
 #include <cstring>
 #include <fstream>
