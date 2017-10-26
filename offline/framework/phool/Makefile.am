@@ -13,8 +13,7 @@ AM_CPPFLAGS = \
 libphool_la_LDFLAGS = \
   -L$(libdir) \
   -L$(OFFLINE_MAIN)/lib \
-  `root-config --libs` \
-  -lEvent
+  `root-config --libs`
 
 libphool_la_SOURCES = \
   PHBase_dict.cc \
@@ -29,7 +28,6 @@ libphool_la_SOURCES = \
   PHObject.cc \
   PHOperation.cc \
   PHRandomSeed.cc \
-  PHRawOManager.cc \
   PHTimer.cc \
   PHTimeServer.cc \
   PHTimeStamp.cc \
@@ -55,7 +53,6 @@ pkginclude_HEADERS =  \
   PHRandomSeed.h \
   PHPointerList.h \
   PHPointerListIterator.h \
-  PHRawOManager.h \
   PHTimer.h \
   PHTimeServer.h \
   PHTimeStamp.h \
