@@ -86,6 +86,7 @@ pkginclude_HEADERS = \
   PHG4HoughTransform.h \
   PHG4HoughTransformTPC.h \
   PHG4KalmanPatRec.h \
+  PHHoughSeeding.h \
   PHG4InitZVertexing.h \
   PHG4PatternReco.h \
   PHG4TrackGhostRejection.h \
@@ -185,6 +186,8 @@ libg4hough_la_SOURCES = \
   PHG4HoughTransformTPC_Dict.C \
   PHG4KalmanPatRec.C \
   PHG4KalmanPatRec_Dict.C \
+  PHHoughSeeding.C \
+  PHHoughSeeding_Dict.C \
   PHRaveVertexing.C \
   PHRaveVertexing_Dict.C \
   PHG4InitZVertexing.C \
