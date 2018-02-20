@@ -36,12 +36,12 @@
 
 // g4hough includes
 #include "SvtxTrackState.h"
+#include "SvtxTrackMap.h"
 
 // forward declarations
 class PHCompositeNode;
 class SvtxClusterMap;
 class SvtxCluster;
-class SvtxTrackMap;
 class SvtxTrack;
 class SvtxVertexMap;
 class SvtxVertex;
@@ -668,7 +668,10 @@ private:
 			const bool use_fitted_state_once = false);
 
 	//!
-	PHGenFit::Measurement* SvtxClusterToPHGenFitMeasurement(const SvtxCluster* cluster);
+	std::shared_ptr<PHGenFit::Track> SvtxTrackToPHGenFitTrack(PHCompositeNode* topNode, const SvtxTrack* svtxtrack, const int pid) const;
+
+	//!
+	PHGenFit::Measurement* SvtxClusterToPHGenFitMeasurement(const SvtxCluster* cluster) const;
 
 	//! TrackPropPatRec Call.
 	std::vector<unsigned int> SearchHitsNearBy (const unsigned int layer, const float z_center, const float phi_center, const float z_window, const float phi_window);
@@ -676,7 +679,7 @@ private:
 
 	//! ExportOutput Call. Make SvtxTrack from PHGenFit::Track and set of clusters
 	//std::shared_ptr<SvtxTrack> MakeSvtxTrack(const int genfit_track_ID, const SvtxVertex * vertex = NULL);
-	int OutputPHGenFitTrack(PHCompositeNode* topNode, MapPHGenFitTrack::iterator);
+	int OutputPHGenFitTrack(PHCompositeNode* topNode, SvtxTrackMap::Iter iter_svtx, MapPHGenFitTrack::iterator iter_genfit);
 
 	//------------------
 	// Subfunction Calls

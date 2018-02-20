@@ -98,7 +98,7 @@
 #define LogError(exp)		std::cout<<"ERROR: "  <<__FILE__<<": "<<__LINE__<<": "<< exp
 #define LogWarning(exp)	std::cout<<"WARNING: "<<__FILE__<<": "<<__LINE__<<": "<< exp
 
-//#define _DEBUG_
+#define _DEBUG_
 
 //#define _USE_ALAN_FULL_VERTEXING_
 #define _USE_ALAN_TRACK_REFITTING_
@@ -441,15 +441,17 @@ int PHGenFitTrackProp::process_event(PHCompositeNode *topNode) {
 
 	GetNodes(topNode);
 
+	int code = Fun4AllReturnCodes::ABORTEVENT;
+
 	if(verbosity >= 1) _t_seeding->restart();
 
 	//-----------------------------------
 	// Translate into Helix_Hough objects
 	//-----------------------------------
 
-	int code = translate_input();
-	if (code != Fun4AllReturnCodes::EVENT_OK)
-		return code;
+//	code = translate_input();
+//	if (code != Fun4AllReturnCodes::EVENT_OK)
+//		return code;
 
 	//-----------------------------------
 	// Guess a vertex position
@@ -469,18 +471,18 @@ int PHGenFitTrackProp::process_event(PHCompositeNode *topNode) {
 //	if (code != Fun4AllReturnCodes::EVENT_OK)
 //		return code;
 
-	code = vertexing(topNode);
-	if (code != Fun4AllReturnCodes::EVENT_OK)
-		return code;
+//	code = vertexing(topNode);
+//	if (code != Fun4AllReturnCodes::EVENT_OK)
+//		return code;
 	// here expect vertex to be better than +/- 500 um
 
 	//-----------------------------------
 	// Seeding
 	//-----------------------------------
 	//TODO simplify this function
-	code = full_track_seeding();
-	if (code != Fun4AllReturnCodes::EVENT_OK)
-		return code;
+//	code = full_track_seeding();
+//	if (code != Fun4AllReturnCodes::EVENT_OK)
+//		return code;
 
 	if(verbosity >= 1) _t_seeding->stop();
 
@@ -2495,11 +2497,14 @@ int PHGenFitTrackProp::FullTrackFitting(PHCompositeNode* topNode) {
 	_PHGenFitTracks.clear();
 
 	//	for(unsigned int itrack = 0; itrack < ( (_tracks.size() < 100) ? _tracks.size() : 100); ++itrack) {
-	for (unsigned int itrack = 0; itrack < _tracks.size(); ++itrack) {
+	//for (unsigned int itrack = 0; itrack < _tracks.size(); ++itrack) {
+	for(auto iter_g4tracks = _g4tracks->begin(); iter_g4tracks != _g4tracks->end(); ++iter_g4tracks) {
+		SvtxTrack* intrack = iter_g4tracks->second;
+
 #ifdef _DEBUG_
 		std::cout
 		<< __LINE__
-		<< ": Processing itrack: " << itrack
+		//<< ": Processing itrack: " << itrack
 		<< ": Total tracks: " << _g4tracks->size()
 		<<endl;
 #endif
@@ -2508,7 +2513,23 @@ int PHGenFitTrackProp::FullTrackFitting(PHCompositeNode* topNode) {
 		 * Translate SimpleTrack3D To PHGenFitTracks
 		 */
 		if(verbosity > 1) _t_translate_to_PHGenFitTrack->restart();
-		SimpleTrack3DToPHGenFitTracks(topNode, itrack);
+		//SimpleTrack3DToPHGenFitTracks(topNode, itrack);
+		std::shared_ptr<PHGenFit::Track> phgf_track = SvtxTrackToPHGenFitTrack(topNode, intrack, _primary_pid_guess);
+		if(!phgf_track) {
+			if (verbosity >= 1)
+				LogWarning("!phgf_track")<<std::endl;
+			continue;
+		}
+		int nhits = phgf_track->get_cluster_IDs().size();
+		float chi2 = phgf_track->get_chi2();
+		float ndf  = phgf_track->get_ndf();
+
+		if(nhits > 0 and chi2 > 0 and ndf > 0) {
+			_PHGenFitTracks.push_back(
+					MapPHGenFitTrack::value_type(
+							PHGenFitTrackProp::TrackQuality(nhits, chi2, ndf, nhits, 0, 0), phgf_track)
+			);
+		}
 		if(verbosity > 1) _t_translate_to_PHGenFitTrack->stop();
 
 		/*!
@@ -2523,7 +2544,7 @@ int PHGenFitTrackProp::FullTrackFitting(PHCompositeNode* topNode) {
 #ifdef _DEBUG_
 			cout
 			<< __LINE__
-			<< ": propergating: " << i <<"/" << itrack
+			//<< ": propergating: " << i <<"/" << itrack
 			<< endl;
 #endif
 
@@ -2597,7 +2618,7 @@ int PHGenFitTrackProp::FullTrackFitting(PHCompositeNode* topNode) {
 		auto iter = _PHGenFitTracks.begin();
 
 		if (iter->second->get_cluster_IDs().size() >= _min_good_track_hits) {
-			OutputPHGenFitTrack(topNode, iter);
+			OutputPHGenFitTrack(topNode, iter_g4tracks, iter);
 #ifdef _DEBUG_
 			cout << __LINE__ << endl;
 #endif
@@ -2631,7 +2652,7 @@ int PHGenFitTrackProp::FullTrackFitting(PHCompositeNode* topNode) {
 
 int PHGenFitTrackProp::ExportOutput() { return 0;}
 
-int PHGenFitTrackProp::OutputPHGenFitTrack(PHCompositeNode* topNode, MapPHGenFitTrack::iterator iter) {
+int PHGenFitTrackProp::OutputPHGenFitTrack(PHCompositeNode* topNode, SvtxTrackMap::Iter iter_svtx, MapPHGenFitTrack::iterator iter_genfit) {
 
 //#ifdef _DEBUG_
 //	std::cout << "=========================" << std::endl;
@@ -2648,7 +2669,7 @@ int PHGenFitTrackProp::OutputPHGenFitTrack(PHCompositeNode* topNode, MapPHGenFit
 		std::cout << "=========================" << std::endl;
 		//std::cout << __LINE__ << ": iPHGenFitTrack: " << iter->first << std::endl;
 		std::cout << __LINE__ << ": _g4tracks->size(): " << _g4tracks->size() << std::endl;
-		std::cout << "Contains: " << iter->second->get_cluster_IDs().size() << " clusters." <<std::endl;
+		std::cout << "Contains: " << iter_genfit->second->get_cluster_IDs().size() << " clusters." <<std::endl;
 		std::cout << "=========================" << std::endl;
 #endif
 
@@ -2658,7 +2679,7 @@ int PHGenFitTrackProp::OutputPHGenFitTrack(PHCompositeNode* topNode, MapPHGenFit
 
 #ifdef _DO_FULL_FITTING_
 		if(verbosity >= 1) _t_full_fitting->restart();
-		if (_fitter->processTrack(iter->second.get(), false) != 0) {
+		if (_fitter->processTrack(iter_genfit->second.get(), false) != 0) {
 			if (verbosity >= 1)
 				LogWarning("Track fitting failed\n");
 			//delete track;
@@ -2669,15 +2690,15 @@ int PHGenFitTrackProp::OutputPHGenFitTrack(PHCompositeNode* topNode, MapPHGenFit
 		if(verbosity >= 1) _t_output_io->restart();
 //		iter->second->getGenFitTrack()->Print();
 
-		track.set_chisq(iter->second->get_chi2());
-		track.set_ndf(iter->second->get_ndf());
+		track.set_chisq(iter_genfit->second->get_chi2());
+		track.set_ndf(iter_genfit->second->get_ndf());
 
 		//FIXME use fitted vertex
 		TVector3 vertex_position(0, 0, 0);
 		std::unique_ptr<genfit::MeasuredStateOnPlane> gf_state_vertex_ca = NULL;
 		try {
 			gf_state_vertex_ca = std::unique_ptr < genfit::MeasuredStateOnPlane
-					> (iter->second->extrapolateToPoint(vertex_position));
+					> (iter_genfit->second->extrapolateToPoint(vertex_position));
 		} catch (...) {
 			if (verbosity >= 2)
 				LogWarning("extrapolateToPoint failed!");
@@ -2691,7 +2712,7 @@ int PHGenFitTrackProp::OutputPHGenFitTrack(PHCompositeNode* topNode, MapPHGenFit
 		TVector3 pos = gf_state_vertex_ca->getPos();
 		TMatrixDSym cov = gf_state_vertex_ca->get6DCov();
 #else
-		TVectorD state = iter->second->getGenFitTrack()->getStateSeed();
+		TVectorD state = iter_genfit->second->getGenFitTrack()->getStateSeed();
 		TVector3 pos(state(0),state(1),state(2));
 		TVector3 mom(state(3),state(4),state(5));
 #endif
@@ -2703,11 +2724,14 @@ int PHGenFitTrackProp::OutputPHGenFitTrack(PHCompositeNode* topNode, MapPHGenFit
 		track.set_y(pos.Y());
 		track.set_z(pos.Z());
 
-		for(unsigned int cluster_ID : iter->second->get_cluster_IDs()){
+		for(unsigned int cluster_ID : iter_genfit->second->get_cluster_IDs()){
 			track.insert_cluster(cluster_ID);
 		}
 
-		_g4tracks->insert(&track);
+		//_g4tracks->insert(&track);
+
+		*(dynamic_cast<SvtxTrack_v1*>(iter_svtx->second)) =
+				*(dynamic_cast<SvtxTrack_v1*>(&track));
 
 		if (verbosity > 5) {
 			cout << "track " << _g4tracks->size() << " quality = " << track.get_quality()
@@ -2722,6 +2746,128 @@ int PHGenFitTrackProp::OutputPHGenFitTrack(PHCompositeNode* topNode, MapPHGenFit
 
 
 	return 0;
+}
+
+
+std::shared_ptr<PHGenFit::Track> PHGenFitTrackProp::SvtxTrackToPHGenFitTrack(
+		PHCompositeNode* topNode,
+		const SvtxTrack* intrack,
+		const int pid) const {
+
+	TVector3 seed_mom(
+			intrack->get_px(),
+			intrack->get_py(),
+			intrack->get_pz()
+	);
+
+	TVector3 seed_pos(
+			intrack->get_x(),
+			intrack->get_y(),
+			intrack->get_z()
+			);
+
+	//TODO optimize
+	const float blowup_factor = 1.;
+
+	TMatrixDSym seed_cov(6);
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < 6; j++) {
+			seed_cov[i][j] = blowup_factor*intrack->get_error(i, j);
+		}
+	}
+
+	genfit::AbsTrackRep* rep = new genfit::RKTrackRep(pid);
+
+	std::shared_ptr<PHGenFit::Track> track(
+			new PHGenFit::Track(rep, seed_pos, seed_mom, seed_cov));
+
+#ifdef _DEBUG_
+	LogDebug("") << std::endl;
+	seed_pos.Print();
+	seed_mom.Print();
+	seed_cov.Print();
+#endif
+
+	std::multimap<float, unsigned int> m_r_clusterID;
+	for (auto iter = intrack->begin_clusters();
+			iter != intrack->end_clusters(); ++iter) {
+		unsigned int cluster_id = *iter;
+		SvtxCluster* cluster = _g4clusters->get(cluster_id);
+		float x = cluster->get_x();
+		float y = cluster->get_y();
+		float r = sqrt(x*x+y*y);
+		m_r_clusterID.insert(std::pair<float, unsigned int>(r, cluster_id));
+	}
+
+	std::vector<PHGenFit::Measurement*> measurements;
+
+	//TODO removed for now
+//	{
+//		TVector3 v(_vertex[0],_vertex[1],_vertex[2]);
+//		TMatrixDSym cov(3);
+//		cov.Zero();
+//		cov(0, 0) = _vertex_error[0]*_vertex_error[0];
+//		cov(1, 1) = _vertex_error[1]*_vertex_error[1];
+//		cov(2, 2) = _vertex_error[2]*_vertex_error[2];
+//		PHGenFit::Measurement* meas = new PHGenFit::SpacepointMeasurement(v, cov);
+//		//FIXME re-use the first cluster id
+//		unsigned int id = m_r_clusterID.begin()->second;
+//		meas->set_cluster_ID(id);
+//		measurements.push_back(meas);
+//#ifdef _DEBUG_
+//	cout<<__LINE__<<": "<<measurements.front()->get_cluster_ID()<<endl;
+//	v.Print();
+//#endif
+//	}
+
+
+	//std::vector<unsigned int> hitIDs;
+	//for (SimpleHit3D hit : track_hits) {
+	//unsigned int cluster_ID = hit.get_id();
+	for (auto iter = m_r_clusterID.begin();
+			iter != m_r_clusterID.end();
+			++iter) {
+
+		unsigned int cluster_ID = iter->second;
+
+		SvtxCluster* cluster = _g4clusters->get(cluster_ID);
+
+		if (!cluster) {
+			LogError("No cluster Found!\n");continue;
+		}
+
+		PHGenFit::Measurement *meas = SvtxClusterToPHGenFitMeasurement(cluster);
+
+		if(meas)
+			measurements.push_back(meas);
+	}
+	track->addMeasurements(measurements);
+
+#ifdef _DEBUG_
+	{
+		std::vector<unsigned int> clusterIDs = track->get_cluster_IDs();
+		for (unsigned int i = 0; i< clusterIDs.size(); ++i) {
+			cout
+			<< __LINE__
+			<<": Num: " << i
+			<<": layer: " << _g4clusters->get(clusterIDs[i])->get_layer()
+			<<": ID: " << clusterIDs[i]
+			<<endl;
+		}
+	}
+#endif
+
+	/*!
+	 *  Fit the track
+	 *  ret code 0 means 0 error or good status
+	 */
+	if (_fitter->processTrack(track.get(), false) != 0) {
+		if (verbosity >= 1)
+			LogWarning("Seed fitting failed")<<std::endl;
+		return nullptr;
+	}
+
+	return track;
 }
 
 
@@ -3354,7 +3500,7 @@ int PHGenFitTrackProp::TrackPropPatRec(
 }
 
 PHGenFit::Measurement* PHGenFitTrackProp::SvtxClusterToPHGenFitMeasurement(
-		const SvtxCluster* cluster) {
+		const SvtxCluster* cluster) const{
 
 	if(!cluster) return nullptr;
 
@@ -3582,9 +3728,9 @@ std::vector<unsigned int> PHGenFitTrackProp::SearchHitsNearBy(const unsigned int
 //std::shared_ptr<SvtxTrack> PHGenFitTrackProp::MakeSvtxTrack(
 //		const int genfit_track_ID, const SvtxVertex* vertex) {
 //
-//	std::shared_ptr<SvtxTrack> svtxtrack(new SvtxTrack_v1());
+//	std::shared_ptr<SvtxTrack> intrack(new SvtxTrack_v1());
 //
-//	return svtxtrack;
+//	return intrack;
 //}
 
 unsigned int PHGenFitTrackProp::encode_cluster_index(const unsigned int layer,
