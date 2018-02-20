@@ -186,7 +186,7 @@ PHHoughSeeding::PHHoughSeeding(
 	  _cells_maps(nullptr),
 	  _geom_container_intt(nullptr),
 	  _geom_container_maps(nullptr),
-	  _seeding_only_mode(false),
+	  _seeding_only_mode(true),
 	  _analyzing_mode(false),
       _analyzing_file(NULL),
       _analyzing_ntuple(NULL),
@@ -294,9 +294,9 @@ int PHHoughSeeding::InitRun(PHCompositeNode* topNode) {
 	if(code != Fun4AllReturnCodes::EVENT_OK)
 		return code;
 
-	code = InitializePHGenFit(topNode);
-	if(code != Fun4AllReturnCodes::EVENT_OK)
-		return code;
+//	code = InitializePHGenFit(topNode);
+//	if(code != Fun4AllReturnCodes::EVENT_OK)
+//		return code;
 
 	/*!
 	 * Initilize parameters
