@@ -116,6 +116,9 @@ int PHG4CylinderSubsystem::process_event(PHCompositeNode *topNode)
 void PHG4CylinderSubsystem::SetDefaultParameters()
 {
   set_default_double_param("length", 100);
+  set_default_double_param("rot_x", 0.);
+  set_default_double_param("rot_y", 0.);
+  set_default_double_param("rot_z", 0.);
   set_default_double_param("place_x", 0.);
   set_default_double_param("place_y", 0.);
   set_default_double_param("place_z", 0.);

@@ -45,7 +45,38 @@ bool PHG4CylinderDetector::IsInCylinder(const G4VPhysicalVolume *volume) const
 //_______________________________________________________________
 void PHG4CylinderDetector::Construct(G4LogicalVolume *logicWorld)
 {
-  G4Material *TrackerMaterial = G4Material::GetMaterial(params->get_string_param("material"));
+	G4Material *TrackerMaterial = nullptr;
+	if (params->get_string_param("material").find("Target")
+			!= std::string::npos) {
+		G4double z;
+		G4double a;
+		G4String symbol;
+		G4String name;
+		G4double density;
+		G4int ncomponents;
+		G4int natoms;
+
+		G4Element *elH = new G4Element(name="Hydrogen", symbol="H" , z=1., a = 1.01*g/mole);
+		G4Element *elN = new G4Element(name="Nitrogen", symbol="N" , z=7., a = 14.0*g/mole);
+
+		G4Material* N2 = new G4Material(name = "G4_N2", density = 0.25 * g/cm3, ncomponents = 1);
+		N2->AddElement(elN, natoms = 2);
+
+		G4Material* NH3 = new G4Material(name = "G4_NH3", density = 0.867 * g/cm3, ncomponents = 2);
+		NH3->AddElement(elN, natoms = 1);
+		NH3->AddElement(elH, natoms = 3);
+
+		G4Material* Target = new G4Material(name = "Target", density = 0.59 * g/cm3, ncomponents = 2);
+		Target->AddMaterial(NH3, 60 * perCent);
+		Target->AddMaterial(N2,  40 * perCent);
+
+		TrackerMaterial = Target;
+
+		std::cout<< "DEBUG: " << TrackerMaterial << std::endl;
+	} else {
+		TrackerMaterial = G4Material::GetMaterial(
+				params->get_string_param("material"));
+	}
 
   if (!TrackerMaterial)
   {
@@ -86,7 +117,14 @@ void PHG4CylinderDetector::Construct(G4LogicalVolume *logicWorld)
                                                         G4String(GetName().c_str()),
                                                         nullptr, nullptr, g4userlimits);
   cylinder_logic->SetVisAttributes(siliconVis);
-  cylinder_physi = new G4PVPlacement(0, G4ThreeVector(params->get_double_param("place_x") * cm,
+
+  G4RotationMatrix *rotm  = new G4RotationMatrix();
+  rotm->rotateX(params->get_double_param("rot_x")*deg);
+  rotm->rotateY(params->get_double_param("rot_y")*deg);
+  rotm->rotateZ(params->get_double_param("rot_z")*deg);
+  params->Print();
+  rotm->print(std::cout);
+  cylinder_physi = new G4PVPlacement(rotm, G4ThreeVector(params->get_double_param("place_x") * cm,
                                                       params->get_double_param("place_y") * cm,
                                                       params->get_double_param("place_z") * cm),
                                      cylinder_logic,
