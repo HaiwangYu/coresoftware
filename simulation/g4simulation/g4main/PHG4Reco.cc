@@ -280,7 +280,7 @@ int PHG4Reco::InitField(PHCompositeNode *topNode)
   }
   else
   {
-    default_field_cfg.reset(new PHFieldConfig_v2(0, 0, magfield * magfield_rescale));
+    default_field_cfg.reset(new PHFieldConfig_v2(0, magfield * magfield_rescale, 0));
   }
 
   if (verbosity > 1) cout << "PHG4Reco::InitField - create magnetic field setup" << endl;
