@@ -56,19 +56,25 @@ void PHG4CylinderDetector::Construct(G4LogicalVolume *logicWorld)
 		G4int ncomponents;
 		G4int natoms;
 
-		G4Element *elH = new G4Element(name="Hydrogen", symbol="H" , z=1., a = 1.01*g/mole);
-		G4Element *elN = new G4Element(name="Nitrogen", symbol="N" , z=7., a = 14.0*g/mole);
+		G4Element *elH  = new G4Element(name="Hydrogen", symbol="H" ,  z=1., a = 1.01 *g/mole);
+		G4Element *elHe = new G4Element(name="Helium",   symbol="He" , z=2., a = 4.003*g/mole);
+		G4Element *elN  = new G4Element(name="Nitrogen", symbol="N" ,  z=7., a = 14.0 *g/mole);
 
-		G4Material* N2 = new G4Material(name = "G4_N2", density = 0.25 * g/cm3, ncomponents = 1);
-		N2->AddElement(elN, natoms = 2);
+		//G4Material* sN2 = new G4Material(name = "G4_sN2",   density = 0.25  * g/cm3, ncomponents = 1);
+		//sN2->AddElement(elN, natoms = 2);
 
-		G4Material* NH3 = new G4Material(name = "G4_NH3", density = 0.867 * g/cm3, ncomponents = 2);
-		NH3->AddElement(elN, natoms = 1);
-		NH3->AddElement(elH, natoms = 3);
+		G4Material* lHe = new G4Material(name = "G4_lHe",   density = 0.145 * g/cm3, ncomponents = 1);
+		lHe->AddElement(elHe, natoms = 1);
 
-		G4Material* Target = new G4Material(name = "Target", density = 0.59 * g/cm3, ncomponents = 2);
-		Target->AddMaterial(NH3, 60 * perCent);
-		Target->AddMaterial(N2,  40 * perCent);
+		G4Material* sNH3 = new G4Material(name = "G4_sNH3", density = 0.867 * g/cm3, ncomponents = 2);
+		sNH3->AddElement(elN, natoms = 1);
+		sNH3->AddElement(elH, natoms = 3);
+
+		// M_He = 0.4*0.145 = 0.058 g; M_NH3 = 0.6*0.867 = 0.520 g, M/rho = 0.578
+		// f_M_He = 10.0%, f_M_NH3 = 90.0%
+		G4Material* Target = new G4Material(name = "Target", density = 0.578 * g/cm3, ncomponents = 2);
+		Target->AddMaterial(sNH3, 90 * perCent);
+		Target->AddMaterial(lHe,  10 * perCent);
 
 		TrackerMaterial = Target;
 
