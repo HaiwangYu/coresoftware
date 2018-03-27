@@ -79,6 +79,35 @@ void PHG4CylinderDetector::Construct(G4LogicalVolume *logicWorld)
 		TrackerMaterial = Target;
 
 		std::cout<< "DEBUG: " << TrackerMaterial << std::endl;
+	} else if (params->get_string_param("material").find("Coil")
+			!= std::string::npos) {
+		G4double z;
+		G4double a;
+		G4String symbol;
+		G4String name;
+		G4double density;
+		G4int ncomponents;
+		G4int natoms;
+
+		G4Element *elHe = new G4Element(name="Helium",   symbol="He" , z=2.,  a = 4.003*g/mole);
+		G4Element *elFe = new G4Element(name="Iron",     symbol="Fe" , z=26., a = 55.845*g/mole);
+
+
+		G4Material* lHe = new G4Material(name = "G4_lHe",   density = 0.145 * g/cm3, ncomponents = 1);
+		lHe->AddElement(elHe, natoms = 1);
+
+		G4Material* sFe = new G4Material(name = "G4_sFe",   density = 7.87  * g/cm3, ncomponents = 1);
+		sFe->AddElement(elFe, natoms = 1);
+
+		// M_He = 0.5*0.145 = 0.0725 g; M_Fe = 0.5*7.87 = 3.935 g, M/rho = 4.0075
+		// f_M_He = 2%, f_M_NH3 = 98%
+		G4Material* Coil = new G4Material(name = "Coil", density = 4.0075 * g/cm3, ncomponents = 2);
+		Coil->AddMaterial(sFe,  98 * perCent);
+		Coil->AddMaterial(lHe,  2  * perCent);
+
+		TrackerMaterial = Coil;
+
+		std::cout<< "DEBUG: " << TrackerMaterial << std::endl;
 	} else {
 		TrackerMaterial = G4Material::GetMaterial(
 				params->get_string_param("material"));
