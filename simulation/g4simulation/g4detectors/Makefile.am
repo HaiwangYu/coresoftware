@@ -184,6 +184,7 @@ libg4detectors_la_SOURCES = \
   PHG4CrystalCalorimeterSteppingAction.cc \
   PHG4CrystalCalorimeterSubsystem.cc \
   PHG4CrystalCalorimeterSubsystem_Dict.cc \
+  PHG4PolyconDetector.cc \
   PHG4CylinderDetector.cc \
   PHG4CylinderSubsystem.cc \
   PHG4CylinderSubsystem_Dict.cc \

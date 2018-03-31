@@ -1,4 +1,5 @@
 #include "PHG4CylinderSubsystem.h"
+#include "PHG4PolyconDetector.h"
 #include "PHG4CylinderDetector.h"
 #include "PHG4CylinderGeomContainer.h"
 #include "PHG4CylinderGeomv1.h"
@@ -36,7 +37,8 @@ int PHG4CylinderSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
     GetParams()->set_double_param("length", PHG4Utils::GetLengthForRapidityCoverage(GetParams()->get_double_param("radius") + GetParams()->get_double_param("thickness")) * 2);
   }
   // create detector
-  detector_ = new PHG4CylinderDetector(topNode, GetParams(), Name(), GetLayer());
+  //detector_ = new PHG4CylinderDetector(topNode, GetParams(), Name(), GetLayer());
+  detector_ = new PHG4PolyconDetector(topNode, GetParams(), Name(), GetLayer());
   G4double detlength = GetParams()->get_double_param("length");
   detector_->SuperDetector(SuperDetector());
   detector_->OverlapCheck(CheckOverlap());
