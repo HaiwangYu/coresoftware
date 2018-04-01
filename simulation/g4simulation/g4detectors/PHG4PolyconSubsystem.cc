@@ -1,8 +1,9 @@
-#include "PHG4CylinderSubsystem.h"
-#include "PHG4CylinderDetector.h"
+#include "PHG4PolyconSubsystem.h"
+#include "PHG4PolyconDetector.h"
+#include "PHG4PolyconDetector.h"
 #include "PHG4CylinderGeomContainer.h"
 #include "PHG4CylinderGeomv1.h"
-#include "PHG4CylinderSteppingAction.h"
+#include "PHG4PolyconSteppingAction.h"
 
 #include <phparameter/PHParameters.h>
 
@@ -19,7 +20,7 @@
 using namespace std;
 
 //_______________________________________________________________________
-PHG4CylinderSubsystem::PHG4CylinderSubsystem(const std::string &na, const int lyr)
+PHG4PolyconSubsystem::PHG4PolyconSubsystem(const std::string &na, const int lyr)
   : PHG4DetectorSubsystem(na, lyr)
   , detector_(nullptr)
   , steppingAction_(nullptr)
@@ -28,7 +29,7 @@ PHG4CylinderSubsystem::PHG4CylinderSubsystem(const std::string &na, const int ly
 }
 
 //_______________________________________________________________________
-int PHG4CylinderSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
+int PHG4PolyconSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
 {
   // create hit list only for active layers
   if (GetParams()->get_int_param("lengthviarapidity"))
@@ -36,7 +37,7 @@ int PHG4CylinderSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
     GetParams()->set_double_param("length", PHG4Utils::GetLengthForRapidityCoverage(GetParams()->get_double_param("radius") + GetParams()->get_double_param("thickness")) * 2);
   }
   // create detector
-  detector_ = new PHG4CylinderDetector(topNode, GetParams(), Name(), GetLayer());
+  detector_ = new PHG4PolyconDetector(topNode, GetParams(), Name(), GetLayer());
   G4double detlength = GetParams()->get_double_param("length");
   detector_->SuperDetector(SuperDetector());
   detector_->OverlapCheck(CheckOverlap());
@@ -92,17 +93,17 @@ int PHG4CylinderSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
     }
     PHG4CylinderGeom *mygeom = new PHG4CylinderGeomv1(GetParams()->get_double_param("radius"), GetParams()->get_double_param("place_z") - detlength / 2., GetParams()->get_double_param("place_z") + detlength / 2., GetParams()->get_double_param("thickness"));
     geo->AddLayerGeom(GetLayer(), mygeom);
-    steppingAction_ = new PHG4CylinderSteppingAction(detector_, GetParams());
+    steppingAction_ = new PHG4PolyconSteppingAction(detector_, GetParams());
   }
   if (GetParams()->get_int_param("blackhole"))
   {
-    steppingAction_ = new PHG4CylinderSteppingAction(detector_, GetParams());
+    steppingAction_ = new PHG4PolyconSteppingAction(detector_, GetParams());
   }
   return 0;
 }
 
 //_______________________________________________________________________
-int PHG4CylinderSubsystem::process_event(PHCompositeNode *topNode)
+int PHG4PolyconSubsystem::process_event(PHCompositeNode *topNode)
 {
   // pass top node to stepping action so that it gets
   // relevant nodes needed internally
@@ -113,7 +114,7 @@ int PHG4CylinderSubsystem::process_event(PHCompositeNode *topNode)
   return 0;
 }
 
-void PHG4CylinderSubsystem::SetDefaultParameters()
+void PHG4PolyconSubsystem::SetDefaultParameters()
 {
   set_default_double_param("length", 100);
   set_default_double_param("rot_x", 0.);
@@ -136,12 +137,12 @@ void PHG4CylinderSubsystem::SetDefaultParameters()
 }
 
 PHG4Detector *
-PHG4CylinderSubsystem::GetDetector(void) const
+PHG4PolyconSubsystem::GetDetector(void) const
 {
   return detector_;
 }
 
-void PHG4CylinderSubsystem::Print(const string &what) const
+void PHG4PolyconSubsystem::Print(const string &what) const
 {
   cout << Name() << " Parameters: " << endl;
   if (!BeginRunExecuted())
@@ -151,7 +152,7 @@ void PHG4CylinderSubsystem::Print(const string &what) const
     cout << "Fun4AllServer *se = Fun4AllServer::instance();" << endl;
     cout << "PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco(\"PHG4RECO\");" << endl;
     cout << "g4->InitRun(se->topNode());" << endl;
-    cout << "PHG4CylinderSubsystem *cyl = (PHG4CylinderSubsystem *) g4->getSubsystem(\"" << Name() << "\");" << endl;
+    cout << "PHG4PolyconSubsystem *cyl = (PHG4PolyconSubsystem *) g4->getSubsystem(\"" << Name() << "\");" << endl;
     cout << "cyl->Print()" << endl;
     return;
   }

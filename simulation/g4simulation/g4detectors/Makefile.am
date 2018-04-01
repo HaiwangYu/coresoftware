@@ -72,6 +72,7 @@ pkginclude_HEADERS = \
   PHG4CylinderCellGeom_Spacalv1.h \
   PHG4CylinderCellGeomContainer.h \
   PHG4CylinderSubsystem.h \
+  PHG4PolyconSubsystem.h \
   PHG4DetectorSubsystem.h \
   PHG4DetectorGroupSubsystem.h \
   PHG4HcalDefs.h \
@@ -184,13 +185,16 @@ libg4detectors_la_SOURCES = \
   PHG4CrystalCalorimeterSteppingAction.cc \
   PHG4CrystalCalorimeterSubsystem.cc \
   PHG4CrystalCalorimeterSubsystem_Dict.cc \
-  PHG4PolyconDetector.cc \
   PHG4CylinderDetector.cc \
   PHG4CylinderSubsystem.cc \
   PHG4CylinderSubsystem_Dict.cc \
   PHG4CylinderCellReco.cc \
   PHG4CylinderCellReco_Dict.cc \
   PHG4CylinderSteppingAction.cc \
+  PHG4PolyconDetector.cc \
+  PHG4PolyconSubsystem.cc \
+  PHG4PolyconSubsystem_Dict.cc \
+  PHG4PolyconSteppingAction.cc \
   PHG4DetectorGroupSubsystem.cc \
   PHG4DetectorGroupSubsystem_Dict.cc \
   PHG4DetectorSubsystem.cc \

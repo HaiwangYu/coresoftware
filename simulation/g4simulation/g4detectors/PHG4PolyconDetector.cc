@@ -14,6 +14,7 @@
 #include <Geant4/G4PVPlacement.hh>
 #include <Geant4/G4PhysicalConstants.hh>
 #include <Geant4/G4SystemOfUnits.hh>
+#include <Geant4/G4Polycone.hh>
 #include <Geant4/G4Tubs.hh>
 #include <Geant4/G4UserLimits.hh>
 #include <Geant4/G4VisAttributes.hh>
@@ -134,21 +135,29 @@ void PHG4PolyconDetector::Construct(G4LogicalVolume *logicWorld)
   }
 
   // determine length of cylinder using PHENIX's rapidity coverage if flag is true
-  double radius = params->get_double_param("radius") * cm;
-  double thickness = params->get_double_param("thickness") * cm;
+//  double radius = params->get_double_param("radius") * cm;
+//  double thickness = params->get_double_param("thickness") * cm;
 
 //  G4VSolid *cylinder_solid = new G4Tubs(G4String(GetName().c_str()),
 //                                        radius,
 //                                        radius + thickness,
 //                                        params->get_double_param("length") * cm / 2., 0, twopi);
 
+  double l = 227.;
+  double ri = 60.;
+  double ro = 222.25;
+  double t = 3.;
+
+  G4double zPlane[] = { -l/2, -l/2+t, -l/2+t, l/2-t, l/2-t, l/2 };
+  G4double rInner[] = { ri, ri, ro-t, ro-t, ri, ri};
+  G4double rOuter[] = { ro, ro, ro, ro, ro, ro};
   G4VSolid *cylinder_solid = new G4Polycone(G4String(GetName().c_str()),
-               0*Degree,
-               1*Pi,
-               9,
-							 { 0, 0, 0, 0, 0, 0, 0, 0, 0},
-							 { 0, 10, 10, 5 , 5, 10 , 10 , 2, 2},
-							 { 5, 7, 9, 11, 25, 27, 29, 31, 35 })
+               0*deg,
+               1*pi,
+               6,
+			   zPlane,
+			   rInner,
+			   rOuter);
 
   double steplimits = params->get_double_param("steplimits") * cm;
   G4UserLimits *g4userlimits = nullptr;
