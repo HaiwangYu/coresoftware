@@ -120,6 +120,35 @@ PHParameters::exist_double_param(const std::string &name) const
   return false;
 }
 
+void
+PHParameters::set_vdouble_param(const std::string &name, const vdouble dval)
+{
+  vdoubleparams[name] = dval;
+}
+
+PHParameters::vdouble
+PHParameters::get_vdouble_param(const std::string &name) const
+{
+  if (vdoubleparams.find(name) != vdoubleparams.end())
+    {
+      return vdoubleparams.find(name)->second;
+    }
+  cout << PHWHERE << " vdouble parameter " << name
+      << " does not exist (forgot to set?)" << endl;
+
+  exit(1);
+}
+
+bool
+PHParameters::exist_vdouble_param(const std::string &name) const
+{
+  if (vdoubleparams.find(name) != vdoubleparams.end())
+    {
+      return true;
+    }
+  return false;
+}
+
 
 void
 PHParameters::Print() const

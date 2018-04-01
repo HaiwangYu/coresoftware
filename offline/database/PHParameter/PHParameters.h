@@ -5,6 +5,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 class PdbParameterMap;
 class PdbParameterMapContainer;
@@ -19,6 +20,9 @@ class PHParameters: public PHObject
 
   typedef std::map<const std::string, double> dMap;
   typedef dMap::const_iterator dIter;
+  typedef std::vector<double> vdouble;
+  typedef std::map<const std::string,  vdouble> vdMap;
+  typedef vdMap::const_iterator vdIter;
   typedef std::map<const std::string, int> iMap;
   typedef iMap::const_iterator iIter;
   typedef std::map<const std::string, std::string> strMap;
@@ -43,6 +47,12 @@ class PHParameters: public PHObject
   double get_double_param(const std::string &name) const;
   bool exist_double_param(const std::string &name) const;
   std::pair< std::map<const std::string, double>::const_iterator, std::map<const std::string, double>::const_iterator> get_all_double_params() {return std::make_pair(doubleparams.begin(), doubleparams.end());}
+
+  void set_vdouble_param(const std::string &name, const vdouble vdval);
+  vdouble get_vdouble_param(const std::string &name) const;
+  bool exist_vdouble_param(const std::string &name) const;
+  std::pair< std::map<const std::string, std::vector<double> >::const_iterator, std::map<const std::string, std::vector<double> >::const_iterator>
+  get_all_vdouble_params() {return std::make_pair(vdoubleparams.begin(), vdoubleparams.end());}
 
   void set_string_param(const std::string &name, const std::string &str);
   std::string get_string_param(const std::string &name) const;
@@ -82,6 +92,7 @@ class PHParameters: public PHObject
   PdbParameterMap *pdbparam;
   std::string detname;
   dMap doubleparams;
+  vdMap vdoubleparams;
   iMap intparams;
   strMap stringparams;
 
