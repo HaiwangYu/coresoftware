@@ -38,7 +38,8 @@ class PHG4DetectorSubsystem : public PHG4Subsystem
  // Get/Set parameters from macro
   void set_double_param(const std::string &name, const double dval);
   double get_double_param(const std::string &name) const;
-  void set_vdouble_param(const std::string &name, const std::vector<double> dval);
+  void set_vdouble_param(const std::string &name, const std::vector<double> vdval);
+  void set_vdouble_param(const std::string &name, const double dvals[], const unsigned int n);
   std::vector<double> get_vdouble_param(const std::string &name) const;
   void set_int_param(const std::string &name, const int ival);
   int get_int_param(const std::string &name) const;

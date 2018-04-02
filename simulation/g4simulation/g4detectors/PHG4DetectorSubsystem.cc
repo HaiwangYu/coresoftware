@@ -186,6 +186,14 @@ PHG4DetectorSubsystem::set_vdouble_param(const std::string &name, const std::vec
   vdparams[name] = vdval;
 }
 
+void
+PHG4DetectorSubsystem::set_vdouble_param(const std::string &name, const double dvals[], const unsigned int n)
+{
+	std::vector<double> vdval;
+	vdval.assign(dvals, dvals+n);
+	set_vdouble_param(name, vdval);
+}
+
 double
 PHG4DetectorSubsystem::get_double_param(const std::string &name) const
 {
@@ -242,6 +250,10 @@ PHG4DetectorSubsystem::UpdateParametersWithMacro()
   for (map<const string,double>::const_iterator iter = dparams.begin(); iter != dparams.end(); ++iter)
     {
       params->set_double_param(iter->first,iter->second);
+    }
+  for (auto iter = vdparams.begin(); iter != vdparams.end(); ++iter)
+    {
+      params->set_vdouble_param(iter->first,iter->second);
     }
   for (map<const string,int>::const_iterator iter = iparams.begin(); iter != iparams.end(); ++iter)
     {
