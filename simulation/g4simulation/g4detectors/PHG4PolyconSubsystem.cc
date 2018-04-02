@@ -116,13 +116,31 @@ int PHG4PolyconSubsystem::process_event(PHCompositeNode *topNode)
 
 void PHG4PolyconSubsystem::SetDefaultParameters()
 {
-  set_default_double_param("length", 100);
+  double l = 22.7;
+  double ri = 6.0;
+  double ro = 22.225;
+  double t = 0.3;
+
+  std::vector<double> z_plane = { -l/2, -l/2+t, -l/2+t, l/2-t, l/2-t, l/2 };
+  std::vector<double> r_inner = { ri, ri, ro-t, ro-t, ri, ri};
+  std::vector<double> r_outer = { ro, ro, ro, ro, ro, ro};
+
+  set_default_int_param("num_z_planes", 6);
+  set_default_vdouble_param("z_plane", z_plane);
+  set_default_vdouble_param("r_inner", r_inner);
+  set_default_vdouble_param("r_outer", r_outer);
+
   set_default_double_param("rot_x", 0.);
   set_default_double_param("rot_y", 0.);
   set_default_double_param("rot_z", 0.);
   set_default_double_param("place_x", 0.);
   set_default_double_param("place_y", 0.);
   set_default_double_param("place_z", 0.);
+
+  set_default_int_param("use_g4steps", 0);
+
+
+  set_default_double_param("length", 100);
   set_default_double_param("radius", 100);
   set_default_double_param("steplimits", NAN);
   set_default_double_param("thickness", 100);
@@ -131,7 +149,6 @@ void PHG4PolyconSubsystem::SetDefaultParameters()
 
   set_default_int_param("lengthviarapidity", 1);
   set_default_int_param("lightyield", 0);
-  set_default_int_param("use_g4steps", 0);
 
   set_default_string_param("material", "G4_Galactic");
 }

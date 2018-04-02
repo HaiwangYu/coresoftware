@@ -4,6 +4,7 @@
 #include <g4main/PHG4Subsystem.h>
 
 #include <map>
+#include <vector>
 #include <string>
 
 class PHParameters;
@@ -37,6 +38,8 @@ class PHG4DetectorSubsystem : public PHG4Subsystem
  // Get/Set parameters from macro
   void set_double_param(const std::string &name, const double dval);
   double get_double_param(const std::string &name) const;
+  void set_vdouble_param(const std::string &name, const std::vector<double> dval);
+  std::vector<double> get_vdouble_param(const std::string &name) const;
   void set_int_param(const std::string &name, const int ival);
   int get_int_param(const std::string &name) const;
   void set_string_param(const std::string &name, const std::string &sval);
@@ -72,6 +75,7 @@ class PHG4DetectorSubsystem : public PHG4Subsystem
   // prevent abuse (this makes the list of possible parameters deterministic)
   void InitializeParameters();
   void set_default_double_param( const std::string &name, const double dval);
+  void set_default_vdouble_param( const std::string &name, const std::vector<double> &dval);
   void set_default_int_param( const std::string &name, const int ival);
   void set_default_string_param( const std::string &name, const std::string &sval);
   int BeginRunExecuted() const {return beginrunexecuted;}
@@ -89,10 +93,12 @@ class PHG4DetectorSubsystem : public PHG4Subsystem
   std::string calibfiledir;
 
   std::map<const std::string, double> dparams;
+  std::map<const std::string, std::vector<double> > vdparams;
   std::map<const std::string, int> iparams;
   std::map<const std::string, std::string> cparams;
 
   std::map<const std::string, double> default_double;
+  std::map<const std::string, std::vector<double> > default_vdouble;
   std::map<const std::string, int> default_int;
   std::map<const std::string, std::string> default_string;
 

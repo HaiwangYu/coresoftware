@@ -21,6 +21,7 @@
 
 #include <cmath>
 #include <sstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -135,29 +136,29 @@ void PHG4PolyconDetector::Construct(G4LogicalVolume *logicWorld)
   }
 
   // determine length of cylinder using PHENIX's rapidity coverage if flag is true
-//  double radius = params->get_double_param("radius") * cm;
-//  double thickness = params->get_double_param("thickness") * cm;
 
-//  G4VSolid *cylinder_solid = new G4Tubs(G4String(GetName().c_str()),
-//                                        radius,
-//                                        radius + thickness,
-//                                        params->get_double_param("length") * cm / 2., 0, twopi);
+  G4int num_z_planes = params->get_int_param("num_z_planes");
+  auto z_plane = params->get_vdouble_param("z_plane");
+  std::for_each(z_plane.begin(), z_plane.end(), [](double &el){el *= cm;});
 
-  double l = 227.;
-  double ri = 60.;
-  double ro = 222.25;
-  double t = 3.;
+  auto r_inner = params->get_vdouble_param("r_inner");
+  std::for_each(r_inner.begin(), r_inner.end(), [](double &el){el *= cm;});
 
-  G4double zPlane[] = { -l/2, -l/2+t, -l/2+t, l/2-t, l/2-t, l/2 };
-  G4double rInner[] = { ri, ri, ro-t, ro-t, ri, ri};
-  G4double rOuter[] = { ro, ro, ro, ro, ro, ro};
+  auto r_outer = params->get_vdouble_param("r_outer");
+  std::for_each(r_outer.begin(), r_outer.end(), [](double &el){el *= cm;});
+
+  cout << "num_z_planes: " << num_z_planes << endl;
+  cout << "z_plane: " << "{ "
+  		<< std::for_each(z_plane.cbegin(), z_plane.cend(), [](const double &d){std::cout << d << " ";})
+  << "}" << endl;
+
   G4VSolid *cylinder_solid = new G4Polycone(G4String(GetName().c_str()),
                0*deg,
-               1*pi,
-               6,
-			   zPlane,
-			   rInner,
-			   rOuter);
+               twopi,
+							 num_z_planes,
+							 z_plane.data(),
+							 r_inner.data(),
+							 r_outer.data());
 
   double steplimits = params->get_double_param("steplimits") * cm;
   G4UserLimits *g4userlimits = nullptr;

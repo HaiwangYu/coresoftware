@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -163,6 +164,28 @@ PHG4DetectorSubsystem::set_double_param(const std::string &name, const double dv
   dparams[name] = dval;
 }
 
+std::vector<double>
+PHG4DetectorSubsystem::get_vdouble_param(const std::string &name) const
+{
+  return params->get_vdouble_param(name);
+}
+
+void
+PHG4DetectorSubsystem::set_vdouble_param(const std::string &name, const std::vector<double> vdval)
+{
+  if (default_vdouble.find(name) == default_vdouble.end())
+    {
+      cout << "vdouble parameter " << name << " not implemented" << endl;
+      cout << "implemented vdouble parameters are:" << endl;
+      for (map<const string, std::vector<double> >::const_iterator iter = default_vdouble.begin(); iter != default_vdouble.end(); ++iter)
+	{
+	  cout << iter->first << endl;
+	}
+      return;
+    }
+  vdparams[name] = vdval;
+}
+
 double
 PHG4DetectorSubsystem::get_double_param(const std::string &name) const
 {
@@ -248,6 +271,27 @@ PHG4DetectorSubsystem::set_default_double_param( const std::string &name, const 
 }
 
 void
+PHG4DetectorSubsystem::set_default_vdouble_param( const std::string &name, const std::vector<double> &vdval)
+{
+  if (default_vdouble.find(name) == default_vdouble.end())
+    {
+      default_vdouble[name] = vdval;
+    }
+  else
+    {
+     cout << "trying to overwrite default double " << name << " "
+	   //<< default_vdouble[name] <<
+		 " with "
+		 << "{ "
+		 //<< std::for_each(vdval.cbegin(), vdval.cend(), [](const double &d){std::cout << d << " ";})
+     << "}"
+		 << endl;
+      exit(1);
+    }
+  return;
+}
+
+void
 PHG4DetectorSubsystem::set_default_int_param( const std::string &name, const int ival)
 {
   if (default_int.find(name) == default_int.end())
@@ -292,6 +336,10 @@ PHG4DetectorSubsystem::InitializeParameters()
   for (map<const string,double>::const_iterator iter = default_double.begin(); iter != default_double.end(); ++iter)
     {
       params->set_double_param(iter->first,iter->second);
+    }
+  for (auto iter = default_vdouble.begin(); iter != default_vdouble.end(); ++iter)
+    {
+      params->set_vdouble_param(iter->first,iter->second);
     }
   for (map<const string,int>::const_iterator iter = default_int.begin(); iter != default_int.end(); ++iter)
     {
