@@ -45,6 +45,7 @@ bool PHG4BNLTargetCoilDetector::IsInCylinder(const G4VPhysicalVolume *volume) co
   return false;
 }
 
+namespace {
 bool PlaceHollowPolycone(
 		G4LogicalVolume *mother,
 		double place,
@@ -248,7 +249,7 @@ bool PlaceLayeredTube(
 
   return true;
 }
-
+}
 //_______________________________________________________________
 void PHG4BNLTargetCoilDetector::Construct(G4LogicalVolume *logicWorld)
 {
@@ -306,7 +307,7 @@ void PHG4BNLTargetCoilDetector::Construct(G4LogicalVolume *logicWorld)
   std::vector<double> i_r_outer = {rm, ro-ts, ro-ts};
 
 
-  G4VSolid *cylinder_solid = new G4Tubs(G4String(GetName().c_str()),
+  G4VSolid *cylinder_solid = new G4Polycone(G4String(GetName().c_str()),
   		0*degree,
 			twopi,
 			o_n_z,
@@ -361,10 +362,7 @@ void PHG4BNLTargetCoilDetector::Construct(G4LogicalVolume *logicWorld)
 			i_r_outer
   );
 
-  //8.25 center
-  //6.15
-
-  double center = 8.25*cm;
+  double center = 0*cm;
   double coil_t = 0.5*cm;
 
   double coil_z1 = 4.0*cm;
@@ -374,15 +372,15 @@ void PHG4BNLTargetCoilDetector::Construct(G4LogicalVolume *logicWorld)
 
   PlaceLayeredTube(
   		cylinder_logic,
-			(center - (coil_z1+coil_z2)/2) *cm,
+			((coil_z1+coil_z2)/2 - center),
 			g4userlimits,
 			overlapcheck,
 			"C1",
 			Coil,
 			SS316L,
-			coil_ri-coil_t,
-			coil_ro+coil_t,
-			(coil_z2-coil_z1)/2+coil_t,
+			coil_ri,
+			coil_ro,
+			(coil_z2-coil_z1)/2,
 			coil_t,
 			0,
 			twopi
@@ -395,15 +393,15 @@ void PHG4BNLTargetCoilDetector::Construct(G4LogicalVolume *logicWorld)
 
   PlaceLayeredTube(
   		cylinder_logic,
-			(center - (coil_z1+coil_z2)/2) *cm,
+			((coil_z1+coil_z2)/2 - center),
 			g4userlimits,
 			overlapcheck,
 			"C2",
 			Coil,
 			SS316L,
-			coil_ri-coil_t,
-			coil_ro+coil_t,
-			(coil_z2-coil_z1)/2+coil_t,
+			coil_ri,
+			coil_ro,
+			(coil_z2-coil_z1)/2,
 			coil_t,
 			0,
 			twopi
@@ -416,15 +414,15 @@ void PHG4BNLTargetCoilDetector::Construct(G4LogicalVolume *logicWorld)
 
   PlaceLayeredTube(
   		cylinder_logic,
-			(center - (coil_z1+coil_z2)/2) *cm,
+			((coil_z1+coil_z2)/2 - center),
 			g4userlimits,
 			overlapcheck,
 			"C3",
 			Coil,
 			SS316L,
-			coil_ri-coil_t,
-			coil_ro+coil_t,
-			(coil_z2-coil_z1)/2+coil_t,
+			coil_ri,
+			coil_ro,
+			(coil_z2-coil_z1)/2,
 			coil_t,
 			0,
 			twopi
