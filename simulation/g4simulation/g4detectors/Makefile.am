@@ -73,6 +73,7 @@ pkginclude_HEADERS = \
   PHG4CylinderCellGeomContainer.h \
   PHG4CylinderSubsystem.h \
   PHG4PolyconSubsystem.h \
+  PHG4TargetCoilSubsystem.h \
   PHG4DetectorSubsystem.h \
   PHG4DetectorGroupSubsystem.h \
   PHG4HcalDefs.h \
@@ -195,6 +196,10 @@ libg4detectors_la_SOURCES = \
   PHG4PolyconSubsystem.cc \
   PHG4PolyconSubsystem_Dict.cc \
   PHG4PolyconSteppingAction.cc \
+  PHG4TargetCoilDetector.cc \
+  PHG4TargetCoilSubsystem.cc \
+  PHG4TargetCoilSubsystem_Dict.cc \
+  PHG4TargetCoilSteppingAction.cc \
   PHG4DetectorGroupSubsystem.cc \
   PHG4DetectorGroupSubsystem_Dict.cc \
   PHG4DetectorSubsystem.cc \
