@@ -38,7 +38,7 @@ PHG4TargetCoilDetector::PHG4TargetCoilDetector(PHCompositeNode *Node, PHParamete
 //_______________________________________________________________
 bool PHG4TargetCoilDetector::IsInCylinder(const G4VPhysicalVolume *volume) const
 {
-  if (volume == cylinder_physi)
+  if (volume == cylinder_physi || volume->GetMotherLogical() == cylinder_physi->GetLogicalVolume())
   {
     return true;
   }
