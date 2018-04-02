@@ -1,5 +1,5 @@
-#include "PHG4TargetCoilSteppingAction.h"
-#include "PHG4TargetCoilDetector.h"
+#include "PHG4BNLTargetCoilSteppingAction.h"
+#include "PHG4BNLTargetCoilDetector.h"
 #include "PHG4StepStatusDecode.h"
 
 #include <phparameter/PHParameters.h>
@@ -22,7 +22,7 @@
 
 using namespace std;
 //____________________________________________________________________________..
-PHG4TargetCoilSteppingAction::PHG4TargetCoilSteppingAction(PHG4TargetCoilDetector* detector, const PHParameters* parameters)
+PHG4BNLTargetCoilSteppingAction::PHG4BNLTargetCoilSteppingAction(PHG4BNLTargetCoilDetector* detector, const PHParameters* parameters)
   : detector_(detector)
   , params(parameters)
   , hits_(nullptr)
@@ -47,7 +47,7 @@ PHG4TargetCoilSteppingAction::PHG4TargetCoilSteppingAction(PHG4TargetCoilDetecto
   zmax += copysign(zmax, 1. / 1e6 * cm);
 }
 
-PHG4TargetCoilSteppingAction::~PHG4TargetCoilSteppingAction()
+PHG4BNLTargetCoilSteppingAction::~PHG4BNLTargetCoilSteppingAction()
 {
   // if the last hit was a zero energie deposit hit, it is just reset
   // and the memory is still allocated, so we need to delete it here
@@ -57,7 +57,7 @@ PHG4TargetCoilSteppingAction::~PHG4TargetCoilSteppingAction()
 }
 
 //____________________________________________________________________________..
-bool PHG4TargetCoilSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
+bool PHG4BNLTargetCoilSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
 {
   // get volume of the current step
   G4TouchableHandle touch = aStep->GetPreStepPoint()->GetTouchableHandle();
@@ -174,7 +174,7 @@ bool PHG4TargetCoilSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
       if (hit->get_z(0) * cm > zmax || hit->get_z(0) * cm < zmin)
       {
         cout << detector_->SuperDetector() << std::setprecision(9)
-             << "PHG4TargetCoilSteppingAction: Entry hit z " << hit->get_z(0) * cm
+             << "PHG4BNLTargetCoilSteppingAction: Entry hit z " << hit->get_z(0) * cm
              << " outside acceptance,  zmin " << zmin
              << ", zmax " << zmax << ", layer: " << layer_id << endl;
       }
@@ -228,7 +228,7 @@ bool PHG4TargetCoilSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
     if (hit->get_z(1) * cm > zmax || hit->get_z(1) * cm < zmin)
     {
       cout << detector_->SuperDetector() << std::setprecision(9)
-           << " PHG4TargetCoilSteppingAction: Exit hit z " << hit->get_z(1) * cm
+           << " PHG4BNLTargetCoilSteppingAction: Exit hit z " << hit->get_z(1) * cm
            << " outside acceptance zmin " << zmin
            << ", zmax " << zmax << ", layer: " << layer_id << endl;
     }
@@ -303,7 +303,7 @@ bool PHG4TargetCoilSteppingAction::UserSteppingAction(const G4Step* aStep, bool)
 }
 
 //____________________________________________________________________________..
-void PHG4TargetCoilSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)
+void PHG4BNLTargetCoilSteppingAction::SetInterfacePointers(PHCompositeNode* topNode)
 {
   string hitnodename;
   if (detector_->SuperDetector() != "NONE")
@@ -321,6 +321,6 @@ void PHG4TargetCoilSteppingAction::SetInterfacePointers(PHCompositeNode* topNode
   // if we do not find the node we need to make it.
   if (!hits_ && !IsBlackHole)
   {
-    std::cout << "PHG4TargetCoilSteppingAction::SetTopNode - unable to find " << hitnodename << std::endl;
+    std::cout << "PHG4BNLTargetCoilSteppingAction::SetTopNode - unable to find " << hitnodename << std::endl;
   }
 }

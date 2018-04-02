@@ -1,5 +1,5 @@
-#ifndef PHG4TargetCoilDetector_h
-#define PHG4TargetCoilDetector_h
+#ifndef PHG4BNLTargetCoilDetector_h
+#define PHG4BNLTargetCoilDetector_h
 
 #include <g4main/PHG4Detector.h>
 
@@ -9,14 +9,14 @@ class G4LogicalVolume;
 class G4VPhysicalVolume;
 class PHParameters;
 
-class PHG4TargetCoilDetector : public PHG4Detector
+class PHG4BNLTargetCoilDetector : public PHG4Detector
 {
  public:
   //! constructor
-  PHG4TargetCoilDetector(PHCompositeNode *Node, PHParameters *parameters, const std::string &dnam, const int layer = 0);
+  PHG4BNLTargetCoilDetector(PHCompositeNode *Node, PHParameters *parameters, const std::string &dnam, const int layer = 0);
 
   //! destructor
-  virtual ~PHG4TargetCoilDetector(void)
+  virtual ~PHG4BNLTargetCoilDetector(void)
   {
   }
 

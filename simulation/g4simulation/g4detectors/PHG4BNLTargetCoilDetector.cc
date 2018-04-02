@@ -1,4 +1,4 @@
-#include "PHG4TargetCoilDetector.h"
+#include "PHG4BNLTargetCoilDetector.h"
 
 #include <phparameter/PHParameters.h>
 
@@ -27,7 +27,7 @@
 using namespace std;
 
 //_______________________________________________________________
-PHG4TargetCoilDetector::PHG4TargetCoilDetector(PHCompositeNode *Node, PHParameters *parameters, const std::string &dnam, const int lyr)
+PHG4BNLTargetCoilDetector::PHG4BNLTargetCoilDetector(PHCompositeNode *Node, PHParameters *parameters, const std::string &dnam, const int lyr)
   : PHG4Detector(Node, dnam)
   , params(parameters)
   , cylinder_physi(nullptr)
@@ -36,13 +36,78 @@ PHG4TargetCoilDetector::PHG4TargetCoilDetector(PHCompositeNode *Node, PHParamete
 }
 
 //_______________________________________________________________
-bool PHG4TargetCoilDetector::IsInCylinder(const G4VPhysicalVolume *volume) const
+bool PHG4BNLTargetCoilDetector::IsInCylinder(const G4VPhysicalVolume *volume) const
 {
   if (volume == cylinder_physi)
   {
     return true;
   }
   return false;
+}
+
+bool PlaceHollowPolycone(
+		G4LogicalVolume *mother,
+		double place,
+		G4UserLimits *g4userlimits,
+		bool overlapcheck,
+		const std::string& name,
+		G4Material *Mouter,
+		int o_n_z,
+		std::vector<double> o_z_plane,
+		std::vector<double> o_r_inner,
+		std::vector<double> o_r_outer,
+		int i_n_z,
+		std::vector<double> i_z_plane,
+		std::vector<double> i_r_inner,
+		std::vector<double> i_r_outer,
+		double phi0 = 0,
+		double phi = twopi
+		)
+{
+  G4VSolid *all_solid = new G4Polycone((name+"_all").c_str(),
+  		phi0,
+			phi,
+			o_n_z,
+			o_z_plane.data(),
+			o_r_inner.data(),
+			o_r_outer.data());
+
+  G4VSolid *inner_solid = new G4Polycone((name+"_inner").c_str(),
+  		phi0,
+			phi,
+			i_n_z,
+			i_z_plane.data(),
+			i_r_inner.data(),
+			i_r_outer.data());
+
+  G4VSolid * outer_solid = new G4SubtractionSolid((name+"_outer").c_str(),
+  		all_solid,
+			inner_solid,
+			0,
+			G4ThreeVector(0,0,0)
+  		);
+
+
+  G4VisAttributes *vis_outer = new G4VisAttributes();
+	PHG4Utils::SetColour(vis_outer, Mouter->GetName());
+	vis_outer->SetVisibility(true);
+	vis_outer->SetForceSolid(true);
+
+  G4LogicalVolume *outer_logic = new G4LogicalVolume(outer_solid,
+  		Mouter,
+			(name+"_outer").c_str(),
+			nullptr, nullptr, g4userlimits);
+
+  outer_logic->SetVisAttributes(vis_outer);
+
+  new G4PVPlacement(
+  		0,
+			G4ThreeVector(0, 0, place),
+			outer_logic,
+			(name+"_outer").c_str(),
+			mother, 0, false, overlapcheck);
+
+  return true;
 }
 
 bool PlaceHollowTube(
@@ -185,7 +250,7 @@ bool PlaceLayeredTube(
 }
 
 //_______________________________________________________________
-void PHG4TargetCoilDetector::Construct(G4LogicalVolume *logicWorld)
+void PHG4BNLTargetCoilDetector::Construct(G4LogicalVolume *logicWorld)
 {
 	G4double z;
 	G4double a;
@@ -198,35 +263,6 @@ void PHG4TargetCoilDetector::Construct(G4LogicalVolume *logicWorld)
 	G4Element *elHe = new G4Element(name="Helium", symbol="He" , z=2.,  a = 4.003*g/mole);
 	G4Material* lHe = new G4Material(name = "G4_lHe", density = 0.145 * g/cm3, ncomponents = 1);
 	lHe->AddElement(elHe, natoms = 1);
-
-//	G4Element *elFe = new G4Element(name="Iron", symbol="Fe" , z=26., a = 55.845*g/mole);
-//	G4Material* sFe = new G4Material(name = "G4_sFe", density = 7.87  * g/cm3, ncomponents = 1);
-//	sFe->AddElement(elFe, natoms = 1);
-//
-//	G4Element *elNb = new G4Element(name="Niobium", symbol="Nb" , z=41., a = 92.906*g/mole);
-//	G4Material* sNb = new G4Material(name = "G4_sNb", density = 8.57  * g/cm3, ncomponents = 1);
-//	sNb->AddElement(elNb, natoms = 1);
-//
-//	G4Element *elTi = new G4Element(name="Titanium", symbol="Ti" , z=22., a = 47.867*g/mole);
-//	G4Material* sTi = new G4Material(name = "G4_sTi", density = 4.506  * g/cm3, ncomponents = 1);
-//	sTi->AddElement(elTi, natoms = 1);
-//
-//	G4Element *elCu = new G4Element(name="Copper", symbol="Cu" , z=29., a = 63.546*g/mole);
-//	G4Material* sCu = new G4Material(name = "G4_sCu", density = 8.96  * g/cm3, ncomponents = 1);
-//	sCu->AddElement(elCu, natoms = 1);
-//
-//	G4Element *elCr = new G4Element(name="Chromium", symbol="Cr" , z=24., a = 51.996*g/mole);
-//	G4Material* sCr = new G4Material(name = "G4_sCr", density = 7.19*g/cm3, ncomponents = 1);
-//	sCr->AddElement(elCr, natoms = 1);
-//
-//	G4Element *elNi = new G4Element(name="Nickel", symbol="Ni" , z=28., a = 28.6934*g/mole);
-//	G4Material* sNi = new G4Material(name = "G4_sNi", density = 8.908*g/cm3, ncomponents = 1);
-//	sNi->AddElement(elNi, natoms = 1);
-//
-//	G4Element *elMo = new G4Element(name="Molybdenum", symbol="Mo" , z=42., a = 95.95*g/mole);
-//	G4Material* sMo = new G4Material(name = "G4_sMo", density = 10.28*g/cm3, ncomponents = 1);
-//	sMo->AddElement(elMo, natoms = 1);
-
 
 	// 1/(0.45/8.57+0.45/4.506+0.1/8.96) = 6.11 g/cm3
 	G4Material* Coil = new G4Material(name = "Coil", density = 6.11*g/cm3, ncomponents = 3);
@@ -250,20 +286,33 @@ void PHG4TargetCoilDetector::Construct(G4LogicalVolume *logicWorld)
 	cylinder_vis->SetForceSolid(true);
 
   // determine length of cylinder using PHENIX's rapidity coverage if flag is true
-  
-  double l = 22.7 * cm; // length
-  double ri = 6.0 * cm;
-  double ro = 22.225 * cm;
+
+	double g1 = 2.3*cm; //gap inner
+	double g2 = 3.1*cm; //gap outer
+	double zend = 13.8*cm; //z end
+	double ri = 4.0*cm;
+	double rm = 7.9*cm;
+	double ro = 16.5*cm;
   double ts = 0.3 * cm; // shell thickness
 
-  //double cl = 1e-2 * cm;
+  int o_n_z = 3;
+  std::vector<double> o_z_plane = {g1, g2, zend};
+  std::vector<double> o_r_inner = {ri, ri, ri};
+  std::vector<double> o_r_outer = {rm, ro, ro};
+
+  int i_n_z = 3;
+  std::vector<double> i_z_plane = {g1+ts, g2, zend-ts};
+  std::vector<double> i_r_inner = {ri+ts, ri+ts, ri+ts};
+  std::vector<double> i_r_outer = {rm, ro-ts, ro-ts};
+
 
   G4VSolid *cylinder_solid = new G4Tubs(G4String(GetName().c_str()),
-  		ri,
-			ro,
-			l/2,
-			0*deg,
-			twopi);
+  		0*degree,
+			twopi,
+			o_n_z,
+			o_z_plane.data(),
+			o_r_inner.data(),
+			o_r_outer.data());
 
   double steplimits = params->get_double_param("steplimits") * cm;
   G4UserLimits *g4userlimits = nullptr;
@@ -295,82 +344,88 @@ void PHG4TargetCoilDetector::Construct(G4LogicalVolume *logicWorld)
 					G4String(GetName().c_str()),
 					logicWorld, 0, false, overlapcheck);
 
-  PlaceHollowTube(
+  PlaceHollowPolycone(
   		cylinder_logic,
 			0,
 			g4userlimits,
 			overlapcheck,
 			"Shell",
 			SS316L,
-			ri,
-			ro,
-			l/2,
-			ts,
-			0,
-			twopi
+			o_n_z,
+			o_z_plane,
+			o_r_inner,
+			o_r_outer,
+			i_n_z,
+			i_z_plane,
+			i_r_inner,
+			i_r_outer
   );
 
-  double c1_l = 4.5 * cm;
-  double c1_ri =  12.5 *cm;
-  double c1_ro = 17.2 *cm;
-  double c1_t = 0.5 *cm;
+  //8.25 center
+  //6.15
+
+  double center = 8.25*cm;
+  double coil_t = 0.5*cm;
+
+  double coil_z1 = 4.0*cm;
+  double coil_z2 = 8.3*cm;
+  double coil_ri = 11.4*cm;
+  double coil_ro = 14.8*cm;
 
   PlaceLayeredTube(
   		cylinder_logic,
-			-7.5 *cm,
+			(center - (coil_z1+coil_z2)/2) *cm,
 			g4userlimits,
 			overlapcheck,
 			"C1",
 			Coil,
 			SS316L,
-			c1_ri-c1_t,
-			c1_ro+c1_t,
-			c1_l/2+c1_t,
-			c1_t,
+			coil_ri-coil_t,
+			coil_ro+coil_t,
+			(coil_z2-coil_z1)/2+coil_t,
+			coil_t,
 			0,
 			twopi
   );
 
-
-  double c2_l = 5.7 * cm;
-  double c2_ri =  7.6 *cm;
-  double c2_ro = 9.4 *cm;
-  double c2_t = 0.5 *cm;
+  coil_z1 = 3.3*cm;
+  coil_z2 = 8.1*cm;
+  coil_ri = 6.9*cm;
+  coil_ro = 10.1*cm;
 
   PlaceLayeredTube(
   		cylinder_logic,
-			-2.8 *cm,
+			(center - (coil_z1+coil_z2)/2) *cm,
 			g4userlimits,
 			overlapcheck,
 			"C2",
 			Coil,
 			SS316L,
-			c2_ri-c2_t,
-			c2_ro+c2_t,
-			c2_l/2+c2_t,
-			c2_t,
+			coil_ri-coil_t,
+			coil_ro+coil_t,
+			(coil_z2-coil_z1)/2+coil_t,
+			coil_t,
 			0,
 			twopi
   );
 
-
-  double c3_l = 1 * cm;
-  double c3_ri =  12.7 *cm;
-  double c3_ro = 13.7 *cm;
-  double c3_t = 0.5 *cm;
+  coil_z1 = 2.9*cm;
+  coil_z2 = 4.8*cm;
+  coil_ri = 4.5*cm;
+  coil_ro = 5.7*cm;
 
   PlaceLayeredTube(
   		cylinder_logic,
-			0.9 *cm,
+			(center - (coil_z1+coil_z2)/2) *cm,
 			g4userlimits,
 			overlapcheck,
 			"C3",
 			Coil,
 			SS316L,
-			c3_ri-c3_t,
-			c3_ro+c3_t,
-			c3_l/2+c3_t,
-			c3_t,
+			coil_ri-coil_t,
+			coil_ro+coil_t,
+			(coil_z2-coil_z1)/2+coil_t,
+			coil_t,
 			0,
 			twopi
   );

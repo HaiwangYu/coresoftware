@@ -1,22 +1,22 @@
-#ifndef PHG4TargetCoilSubsystem_h
-#define PHG4TargetCoilSubsystem_h
+#ifndef PHG4BNLTargetCoilSubsystem_h
+#define PHG4BNLTargetCoilSubsystem_h
 
 #include "PHG4DetectorSubsystem.h"
 
 #include <Geant4/G4String.hh>
 #include <Geant4/G4Types.hh>
 
-class PHG4TargetCoilDetector;
+class PHG4BNLTargetCoilDetector;
 class PHG4SteppingAction;
 
-class PHG4TargetCoilSubsystem : public PHG4DetectorSubsystem
+class PHG4BNLTargetCoilSubsystem : public PHG4DetectorSubsystem
 {
  public:
   //! constructor
-  PHG4TargetCoilSubsystem(const std::string& name = "CYLINDER", const int layer = 0);
+  PHG4BNLTargetCoilSubsystem(const std::string& name = "CYLINDER", const int layer = 0);
 
   //! destructor
-  virtual ~PHG4TargetCoilSubsystem(void)
+  virtual ~PHG4BNLTargetCoilSubsystem(void)
   {
   }
 
@@ -46,7 +46,7 @@ class PHG4TargetCoilSubsystem : public PHG4DetectorSubsystem
 
   //! detector geometry
   /*! defives from PHG4Detector */
-  PHG4TargetCoilDetector* detector_;
+  PHG4BNLTargetCoilDetector* detector_;
 
   //! particle tracking "stepping" action
   /*! derives from PHG4SteppingActions */

@@ -1,9 +1,9 @@
-#include "PHG4TargetCoilSubsystem.h"
-#include "PHG4TargetCoilDetector.h"
-#include "PHG4TargetCoilDetector.h"
+#include "PHG4BNLTargetCoilSubsystem.h"
+#include "PHG4BNLTargetCoilDetector.h"
+#include "PHG4BNLTargetCoilDetector.h"
 #include "PHG4CylinderGeomContainer.h"
 #include "PHG4CylinderGeomv1.h"
-#include "PHG4TargetCoilSteppingAction.h"
+#include "PHG4BNLTargetCoilSteppingAction.h"
 
 #include <phparameter/PHParameters.h>
 
@@ -20,7 +20,7 @@
 using namespace std;
 
 //_______________________________________________________________________
-PHG4TargetCoilSubsystem::PHG4TargetCoilSubsystem(const std::string &na, const int lyr)
+PHG4BNLTargetCoilSubsystem::PHG4BNLTargetCoilSubsystem(const std::string &na, const int lyr)
   : PHG4DetectorSubsystem(na, lyr)
   , detector_(nullptr)
   , steppingAction_(nullptr)
@@ -29,7 +29,7 @@ PHG4TargetCoilSubsystem::PHG4TargetCoilSubsystem(const std::string &na, const in
 }
 
 //_______________________________________________________________________
-int PHG4TargetCoilSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
+int PHG4BNLTargetCoilSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
 {
   // create hit list only for active layers
   if (GetParams()->get_int_param("lengthviarapidity"))
@@ -37,7 +37,7 @@ int PHG4TargetCoilSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
     GetParams()->set_double_param("length", PHG4Utils::GetLengthForRapidityCoverage(GetParams()->get_double_param("radius") + GetParams()->get_double_param("thickness")) * 2);
   }
   // create detector
-  detector_ = new PHG4TargetCoilDetector(topNode, GetParams(), Name(), GetLayer());
+  detector_ = new PHG4BNLTargetCoilDetector(topNode, GetParams(), Name(), GetLayer());
   G4double detlength = GetParams()->get_double_param("length");
   detector_->SuperDetector(SuperDetector());
   detector_->OverlapCheck(CheckOverlap());
@@ -93,17 +93,17 @@ int PHG4TargetCoilSubsystem::InitRunSubsystem(PHCompositeNode *topNode)
     }
     PHG4CylinderGeom *mygeom = new PHG4CylinderGeomv1(GetParams()->get_double_param("radius"), GetParams()->get_double_param("place_z") - detlength / 2., GetParams()->get_double_param("place_z") + detlength / 2., GetParams()->get_double_param("thickness"));
     geo->AddLayerGeom(GetLayer(), mygeom);
-    steppingAction_ = new PHG4TargetCoilSteppingAction(detector_, GetParams());
+    steppingAction_ = new PHG4BNLTargetCoilSteppingAction(detector_, GetParams());
   }
   if (GetParams()->get_int_param("blackhole"))
   {
-    steppingAction_ = new PHG4TargetCoilSteppingAction(detector_, GetParams());
+    steppingAction_ = new PHG4BNLTargetCoilSteppingAction(detector_, GetParams());
   }
   return 0;
 }
 
 //_______________________________________________________________________
-int PHG4TargetCoilSubsystem::process_event(PHCompositeNode *topNode)
+int PHG4BNLTargetCoilSubsystem::process_event(PHCompositeNode *topNode)
 {
   // pass top node to stepping action so that it gets
   // relevant nodes needed internally
@@ -114,7 +114,7 @@ int PHG4TargetCoilSubsystem::process_event(PHCompositeNode *topNode)
   return 0;
 }
 
-void PHG4TargetCoilSubsystem::SetDefaultParameters()
+void PHG4BNLTargetCoilSubsystem::SetDefaultParameters()
 {
   double l = 22.7;
   double ri = 6.0;
@@ -154,12 +154,12 @@ void PHG4TargetCoilSubsystem::SetDefaultParameters()
 }
 
 PHG4Detector *
-PHG4TargetCoilSubsystem::GetDetector(void) const
+PHG4BNLTargetCoilSubsystem::GetDetector(void) const
 {
   return detector_;
 }
 
-void PHG4TargetCoilSubsystem::Print(const string &what) const
+void PHG4BNLTargetCoilSubsystem::Print(const string &what) const
 {
   cout << Name() << " Parameters: " << endl;
   if (!BeginRunExecuted())
@@ -169,7 +169,7 @@ void PHG4TargetCoilSubsystem::Print(const string &what) const
     cout << "Fun4AllServer *se = Fun4AllServer::instance();" << endl;
     cout << "PHG4Reco *g4 = (PHG4Reco *) se->getSubsysReco(\"PHG4RECO\");" << endl;
     cout << "g4->InitRun(se->topNode());" << endl;
-    cout << "PHG4TargetCoilSubsystem *cyl = (PHG4TargetCoilSubsystem *) g4->getSubsystem(\"" << Name() << "\");" << endl;
+    cout << "PHG4BNLTargetCoilSubsystem *cyl = (PHG4BNLTargetCoilSubsystem *) g4->getSubsystem(\"" << Name() << "\");" << endl;
     cout << "cyl->Print()" << endl;
     return;
   }

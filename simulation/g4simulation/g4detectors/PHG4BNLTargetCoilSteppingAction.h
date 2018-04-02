@@ -1,25 +1,25 @@
-#ifndef PHG4TargetCoilSteppingAction_h
-#define PHG4TargetCoilSteppingAction_h
+#ifndef PHG4BNLTargetCoilSteppingAction_h
+#define PHG4BNLTargetCoilSteppingAction_h
 
 #include <g4main/PHG4SteppingAction.h>
 
 #include <string>
 
 class G4VPhysicalVolume;
-class PHG4TargetCoilDetector;
+class PHG4BNLTargetCoilDetector;
 class PHG4Hit;
 class PHG4HitContainer;
 class PHG4Shower;
 class PHParameters;
 
-class PHG4TargetCoilSteppingAction : public PHG4SteppingAction
+class PHG4BNLTargetCoilSteppingAction : public PHG4SteppingAction
 {
  public:
   //! constructor
-  PHG4TargetCoilSteppingAction(PHG4TargetCoilDetector *, const PHParameters *parameters);
+  PHG4BNLTargetCoilSteppingAction(PHG4BNLTargetCoilDetector *, const PHParameters *parameters);
 
   //! destructor
-  virtual ~PHG4TargetCoilSteppingAction();
+  virtual ~PHG4BNLTargetCoilSteppingAction();
 
   //! stepping action
   bool UserSteppingAction(const G4Step *, bool);
@@ -30,7 +30,7 @@ class PHG4TargetCoilSteppingAction : public PHG4SteppingAction
   void SaveLightYield(const int i = 1) { save_light_yield = i; }
  private:
   //! pointer to the detector
-  PHG4TargetCoilDetector *detector_;
+  PHG4BNLTargetCoilDetector *detector_;
 
   const PHParameters *params;
 
