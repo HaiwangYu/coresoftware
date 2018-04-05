@@ -7,29 +7,44 @@
 
 #include <phool/PHCompositeNode.h>
 #include <phool/PHIODataNode.h>
+#include <phool/PHRandomSeed.h>
 
 #include <Geant4/G4ParticleTable.hh>
 #include <Geant4/G4ParticleDefinition.hh>
 
+#include <TRandom.h>
+
 using namespace std;
 
 PHG4ParticleGun::PHG4ParticleGun(const string &name): 
-  PHG4ParticleGeneratorBase(name)
+  PHG4ParticleGeneratorBase(name),
+	_beam_profile(nullptr)
 {
   return;
 }
 
 PHG4ParticleGun::~PHG4ParticleGun()
 {
+	delete _beam_profile;
   return;
+}
+
+int PHG4ParticleGun::InitRun(PHCompositeNode* topNode) : PHG4ParticleGeneratorBase::InitRun(topNode){
+	gRandom->SetSeed(PHRandomSeed());
+	return 0;
 }
 
 int
 PHG4ParticleGun::process_event(PHCompositeNode *topNode)
 {
+	double vx = vtx_x, vy = vtx_y;
+	if(_beam_profile) {
+		_beam_profile->GetRandom2(vx, vy);
+	}
+
   PHG4InEvent *ineve = findNode::getClass<PHG4InEvent>(topNode,"PHG4INEVENT");
   ReuseExistingVertex(topNode); // checks if we should reuse existing vertex
-  int vtxindex = ineve->AddVtx(vtx_x,vtx_y,vtx_z,t0);
+  int vtxindex = ineve->AddVtx(vx,vy,vtx_z,t0);
   vector<PHG4Particle *>::const_iterator iter;
   for (iter = particlelist.begin(); iter != particlelist.end(); ++iter)
     {
@@ -43,4 +58,3 @@ PHG4ParticleGun::process_event(PHCompositeNode *topNode)
     }
   return 0;
 }
-

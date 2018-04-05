@@ -3,6 +3,8 @@
 
 #include "PHG4ParticleGeneratorBase.h"
 
+#include <TF2.h>
+
 class PHG4Particle;
 
 class PHG4ParticleGun: public PHG4ParticleGeneratorBase
@@ -10,9 +12,22 @@ class PHG4ParticleGun: public PHG4ParticleGeneratorBase
  public:
   PHG4ParticleGun(const std::string &name="PGUN");
   virtual ~PHG4ParticleGun();
+
+  virtual int InitRun(PHCompositeNode *topNode);
+
   int process_event(PHCompositeNode *topNode);
 
+	const TF2*& get_beam_profile() const {
+		return _beam_profile;
+	}
+
+	void set_beam_profile(const TF2*& beamProfile) {
+		_beam_profile = beamProfile;
+	}
+
  protected:
+
+  TF2* _beam_profile;
 };
 
 #endif
