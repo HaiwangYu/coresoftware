@@ -17,11 +17,11 @@ class PHG4ParticleGun: public PHG4ParticleGeneratorBase
 
   int process_event(PHCompositeNode *topNode);
 
-	const TF2*& get_beam_profile() const {
+	TF2* get_beam_profile() const {
 		return _beam_profile;
 	}
 
-	void set_beam_profile(const TF2*& beamProfile) {
+	void set_beam_profile(TF2* beamProfile) {
 		_beam_profile = beamProfile;
 	}
 

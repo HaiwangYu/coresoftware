@@ -14,6 +14,8 @@
 
 #include <TRandom.h>
 
+#include <iostream>
+
 using namespace std;
 
 PHG4ParticleGun::PHG4ParticleGun(const string &name): 
@@ -29,7 +31,8 @@ PHG4ParticleGun::~PHG4ParticleGun()
   return;
 }
 
-int PHG4ParticleGun::InitRun(PHCompositeNode* topNode) : PHG4ParticleGeneratorBase::InitRun(topNode){
+int PHG4ParticleGun::InitRun(PHCompositeNode* topNode){
+	PHG4ParticleGeneratorBase::InitRun(topNode);
 	gRandom->SetSeed(PHRandomSeed());
 	return 0;
 }
@@ -41,6 +44,7 @@ PHG4ParticleGun::process_event(PHCompositeNode *topNode)
 	if(_beam_profile) {
 		_beam_profile->GetRandom2(vx, vy);
 	}
+	cout << "PHG4ParticleGun: {" << vx << ", " << vy << "}" << endl;
 
   PHG4InEvent *ineve = findNode::getClass<PHG4InEvent>(topNode,"PHG4INEVENT");
   ReuseExistingVertex(topNode); // checks if we should reuse existing vertex
