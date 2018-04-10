@@ -135,7 +135,9 @@ bool PHG4BNLTargetCoilSteppingAction::UserSteppingAction(const G4Step* aStep, bo
         hit = new PHG4Hitv1();
       }
 
-      hit->set_layer((unsigned int) layer_id);
+      int elem_id = detector_->get_elem_id(volume->GetName());
+
+      hit->set_layer((unsigned int) layer_id*100 + elem_id);
 
       //here we set the entrance values in cm
       hit->set_x(0, prePoint->GetPosition().x() / cm);

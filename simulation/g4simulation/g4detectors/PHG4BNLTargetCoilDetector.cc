@@ -429,6 +429,28 @@ void PHG4BNLTargetCoilDetector::Construct(G4LogicalVolume *logicWorld)
   );
 }
 
+int PHG4BNLTargetCoilDetector::get_elem_id(const std::string& name) const {
+	int ret = 0;
+	if(name.find("C1_inner") != std::string::npos) {
+		ret = 10;
+	} else if (name.find("C1_outer") != std::string::npos) {
+		ret = 11;
+	} else if (name.find("C2_inner") != std::string::npos) {
+		ret = 20;
+	} else if (name.find("C2_outer") != std::string::npos) {
+		ret = 21;
+	} else if (name.find("C3_inner") != std::string::npos) {
+		ret = 30;
+	} else if (name.find("C3_outer") != std::string::npos) {
+		ret = 31;
+	} else if (name.find("Shell") != std::string::npos) {
+		ret = 99;
+	}
+	return ret;
+}
+
+
+
 
 
 

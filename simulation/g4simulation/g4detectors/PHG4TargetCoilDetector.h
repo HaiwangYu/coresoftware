@@ -27,6 +27,7 @@ class PHG4TargetCoilDetector : public PHG4Detector
   void SuperDetector(const std::string &name) { superdetector = name; }
   const std::string SuperDetector() const { return superdetector; }
   int get_Layer() const { return layer; }
+  int get_elem_id(const std::string &name) const;
  private:
   PHParameters *params;
 
