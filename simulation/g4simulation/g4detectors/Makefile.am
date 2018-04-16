@@ -75,6 +75,7 @@ pkginclude_HEADERS = \
   PHG4PolyconSubsystem.h \
   PHG4TargetCoilSubsystem.h \
   PHG4BNLTargetCoilSubsystem.h \
+  PHG4CollimatorSubsystem.h \
   PHG4DetectorSubsystem.h \
   PHG4DetectorGroupSubsystem.h \
   PHG4HcalDefs.h \
@@ -205,6 +206,10 @@ libg4detectors_la_SOURCES = \
   PHG4BNLTargetCoilSubsystem.cc \
   PHG4BNLTargetCoilSubsystem_Dict.cc \
   PHG4BNLTargetCoilSteppingAction.cc \
+  PHG4CollimatorDetector.cc \
+  PHG4CollimatorSubsystem.cc \
+  PHG4CollimatorSubsystem_Dict.cc \
+  PHG4CollimatorSteppingAction.cc \
   PHG4DetectorGroupSubsystem.cc \
   PHG4DetectorGroupSubsystem_Dict.cc \
   PHG4DetectorSubsystem.cc \
