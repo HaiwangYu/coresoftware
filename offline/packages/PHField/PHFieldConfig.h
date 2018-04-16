@@ -45,6 +45,9 @@ class PHFieldConfig : public PHObject
     kField3DCylindrical = 3,
     //! 3D field map expressed in Cartesian coordinates
     Field3DCartesian = 1,
+		//!
+		RegionalConst = 4,
+
 
     //! invalid value
     kFieldInvalid = 9999

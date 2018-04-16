@@ -44,6 +44,7 @@ libphfield_la_SOURCES = \
 	PHField2D.cc \
 	PHField3DCylindrical.cc \
 	PHField3DCartesian.cc \
+	PHFieldRegionalConst.cc \
   PHFieldUtility_Dict.C \
 	PHFieldUtility.cc 
 

@@ -5,6 +5,7 @@
 #include "PHField2D.h"
 #include "PHField3DCartesian.h"
 #include "PHField3DCylindrical.h"
+#include "PHFieldRegionalConst.h"
 #include "PHFieldUniform.h"
 
 // PHENIX includes
@@ -79,6 +80,13 @@ PHFieldUtility::BuildFieldMap(const PHFieldConfig *field_config, const int verbo
   case PHFieldConfig::Field3DCartesian:
     //    return "3D field map expressed in Cartesian coordinates";
     field = new PHField3DCartesian(
+        field_config->get_filename(),
+        field_config->get_magfield_rescale());
+
+    break;
+  case PHFieldConfig::RegionalConst:
+    //    return "3D field map expressed in Cartesian coordinates";
+    field = new PHFieldRegionalConst(
         field_config->get_filename(),
         field_config->get_magfield_rescale());
 
