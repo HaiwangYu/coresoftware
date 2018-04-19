@@ -26,12 +26,9 @@ class PHFieldRegionalConst : public PHField
 
  protected:
 
-  float maxy_, miny_;
-  float maxr_, minr_;
-  float field_val_;
-
- private:
-  void print_map() const;
+  double maxy_, miny_;
+  double maxr_, minr_;
+  double field_val_;
 };
 
 #endif  // __PHFieldRegionalConst_H

@@ -14,15 +14,17 @@ using namespace CLHEP;// units
 PHFieldRegionalConst::PHFieldRegionalConst( const string &filename, const int verb, const float magfield_rescale) :
     PHField(verb),
 		maxy_(4*cm), miny_(-4*cm),
-		maxr_(15*cm), minr_(0*cm),
+		maxr_(22.225*cm), minr_(0*cm),
 		field_val_(5*tesla)
 {
 }
 
 void PHFieldRegionalConst::GetFieldValue(const double point[4], double *Bfield ) const
 {
-	double r = sqrt(point[0]*point[0] + point[2]*point[2]);
-	double y = point[1];
+  double x = point[0];
+  double y = point[1];
+  double z = point[2];
+	double r = sqrt(x*x + z*z);
 
 	Bfield[0] = 0;
 	Bfield[1] = 0;
@@ -33,15 +35,12 @@ void PHFieldRegionalConst::GetFieldValue(const double point[4], double *Bfield )
 		Bfield[1] = field_val_;
 	}
 
-  return;
-}
+//	std::cout
+//	<< "PHFieldRegionalConst::GetFieldValue: "
+//	<< "{" << x/cm << ", " << y/cm << ", " << z/cm << ","  << r/cm << "}"
+//	<< "\t {" << Bfield[0]/tesla << ", " << Bfield[1]/tesla << ", " << Bfield[2]/tesla << "}"
+//	<< std::endl;
 
-// debug function to print key/value pairs in map
-void PHFieldRegionalConst::print_map() const
-{
-	std::cout
-	<< "PHFieldRegionalConst::print_map: "
-	<< "field_val_: " << field_val_/tesla << " tesla"
-	<<std::endl;
+  return;
 }
 
