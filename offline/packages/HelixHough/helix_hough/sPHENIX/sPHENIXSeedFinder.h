@@ -283,8 +283,11 @@ public:
 	void setCutOnDca(bool dcut) {
 		cut_on_dca = dcut;
 	}
-	void setDcaCut(float dcut) {
-		dca_cut = dcut;
+	void setDcaXYCut(float dcut) {
+		dcaxy_cut = dcut;
+	}
+	void setDcaZCut(float dcut) {
+		dcaz_cut = dcut;
 	}
 	void setVertex(float vx, float vy, float vz) {
 		vertex_x = vx;
@@ -501,7 +504,8 @@ private:
 	bool seeding;
 	int verbosity;
 	bool cut_on_dca;
-	float dca_cut;
+	float dcaxy_cut;
+	float dcaz_cut;
 	float vertex_x, vertex_y, vertex_z;
 	unsigned int required_layers;
 	bool reject_ghosts;

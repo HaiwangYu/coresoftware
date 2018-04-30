@@ -122,6 +122,8 @@ PHG4KalmanPatRec::PHG4KalmanPatRec(
 		unsigned int nlayers_maps,
 		unsigned int nlayers_intt,
 		unsigned int nlayers_tpc,
+		double vertex_error_xy,
+		double vertex_error_z,
 		unsigned int nlayers_seeding,
 		unsigned int min_nlayers_seeding
 		)
@@ -156,8 +158,8 @@ PHG4KalmanPatRec::PHG4KalmanPatRec(
       _max_z0(+14.0),
       _max_r(1.0),
       _cut_on_dca(true),
-      _dcaxy_cut(0.2),
-      _dcaz_cut(0.2),
+      _dcaxy_cut(sqrt(0.2*0.2+9*vertex_error_xy*vertex_error_xy)),
+      _dcaz_cut(sqrt( 0.2*0.2+9*vertex_error_z *vertex_error_z)),
       _chi2_cut_fast_par0(10.0),
       _chi2_cut_fast_par1(50.0),
       _chi2_cut_fast_max(75.0),
@@ -278,7 +280,10 @@ PHG4KalmanPatRec::PHG4KalmanPatRec(
 	this->set_seeding_layer(seeding_layers, 7);
 
 	_vertex_error.clear();
-	_vertex_error.assign(3, 0.0100);
+	_vertex_error.assign(3, 0);
+	_vertex_error[0] = vertex_error_xy;
+	_vertex_error[1] = vertex_error_xy;
+	_vertex_error[2] = vertex_error_z;
 }
 
 int PHG4KalmanPatRec::Init(PHCompositeNode* topNode) {
@@ -1510,7 +1515,8 @@ int PHG4KalmanPatRec::setup_tracker_object() {
 		_tracker->setPrintTimings(true);
 	//_tracker->setVerbosity(verbosity);
 	_tracker->setCutOnDca(_cut_on_dca);
-	_tracker->setDcaCut(_dcaxy_cut);
+	_tracker->setDcaXYCut(_dcaxy_cut);
+	_tracker->setDcaZCut(_dcaz_cut);
 	_tracker->setSmoothBack(true);
 	_tracker->setBinScale(_bin_scale);
 	_tracker->setZBinScale(_z_bin_scale);
@@ -1887,21 +1893,28 @@ int PHG4KalmanPatRec::vertexing(PHCompositeNode* topNode) {
 	_vertex[1] = first_point->get_y();
 	_vertex[2] = first_point->get_z();
 
+	if (verbosity > 1) {
+		cout << __LINE__ << " PHG4KalmanPatRec::vertexing: before smearing {" << _vertex[0]
+				<< ", " << _vertex[1] << ", " << _vertex[2] << "} +- {"
+				<< _vertex_error[0] << ", " << _vertex_error[1] << ", "
+				<< _vertex_error[2] << "}" << endl;
+	}
+
 #ifndef __CINT__
 	gsl_rng *RandomGenerator = gsl_rng_alloc(gsl_rng_mt19937);
 	unsigned int seed = PHRandomSeed(); // fixed seed is handled in this funtcion
 //  cout << Name() << " random seed: " << seed << endl;
 	gsl_rng_set(RandomGenerator, seed);
 
-//	_vertex[0] += _vertex_error[0] * gsl_ran_ugaussian(RandomGenerator);
-//	_vertex[1] += _vertex_error[1] * gsl_ran_ugaussian(RandomGenerator);
-//	_vertex[2] += _vertex_error[2] * gsl_ran_ugaussian(RandomGenerator);
+	_vertex[0] += _vertex_error[0] * gsl_ran_ugaussian(RandomGenerator);
+	_vertex[1] += _vertex_error[1] * gsl_ran_ugaussian(RandomGenerator);
+	_vertex[2] += _vertex_error[2] * gsl_ran_ugaussian(RandomGenerator);
 
 	gsl_rng_free(RandomGenerator);
 #endif
 
 	if (verbosity > 1) {
-		cout << __LINE__ << " PHG4KalmanPatRec::vertexing: {" << _vertex[0]
+		cout << __LINE__ << " PHG4KalmanPatRec::vertexing: after smearing {" << _vertex[0]
 				<< ", " << _vertex[1] << ", " << _vertex[2] << "} +- {"
 				<< _vertex_error[0] << ", " << _vertex_error[1] << ", "
 				<< _vertex_error[2] << "}" << endl;

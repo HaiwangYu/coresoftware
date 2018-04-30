@@ -162,7 +162,8 @@ sPHENIXSeedFinder::sPHENIXSeedFinder(unsigned int n_phi, unsigned int n_d,
       seeding(false),
       verbosity(0),
       cut_on_dca(false),
-      dca_cut(0.01),
+      dcaxy_cut(0.01),
+      dcaz_cut(0.01),
       vertex_x(0.),
       vertex_y(0.),
       vertex_z(0.),
@@ -222,7 +223,7 @@ sPHENIXSeedFinder::sPHENIXSeedFinder(vector<vector<unsigned int> >& zoom_profile
       seeding(false),
       verbosity(0),
       cut_on_dca(false),
-      dca_cut(0.01),
+      dcaxy_cut(0.01),
       vertex_x(0.),
       vertex_y(0.),
       vertex_z(0.),
@@ -1796,10 +1797,10 @@ void sPHENIXSeedFinder::findTracksBySegments(vector<SimpleHit3D>& hits,
 		}
 
 		if (cut_on_dca == true) {
-			if (fabs(temp_track.d) > dca_cut) {
+			if (fabs(temp_track.d) > dcaxy_cut) {
 				continue;
 			}
-			if (fabs(temp_track.z0) > dca_cut) {
+			if (fabs(temp_track.z0) > dcaz_cut) {
 				continue;
 			}
 		}

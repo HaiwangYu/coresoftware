@@ -81,6 +81,8 @@ public:
 			unsigned int nlayers_maps = 3,
 			unsigned int nlayers_intt = 4,
 			unsigned int nlayers_tpc = 60,
+			double vertex_error_xy = 0.0100,
+			double vertex_error_z = 0.0100,
 			unsigned int seeding_nlayer = 7,
 			unsigned int min_seeding_nlayer = 4);
 
